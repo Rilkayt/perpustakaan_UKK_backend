@@ -14,8 +14,23 @@ router.post("/", async (req, res) => {
       let getUser =
         await prisma.$queryRaw`SELECT * FROM User WHERE Email=${inputUser} && Password=${inputPw}`;
 
+      let dataUser = {
+        UserID: getUser[0].UserID,
+        Username: getUser[0].Username,
+        Password: getUser[0].Password,
+        NoTelp: getUser[0].NoTelp.toString(),
+        Email: getUser[0].Email,
+        NamaLengkap: getUser[0].NamaLengkap,
+        Alamat: getUser[0].Alamat,
+        Sekolah: getUser[0].Sekolah,
+        Tipe: getUser[0].Tipe,
+      };
+
+      const tokenUser = jwt.sign(dataUser, process.env.TOKEN_SECRET_1);
+
       if (getUser.length > 0) {
         let data = {
+          token: tokenUser,
           UserID: getUser[0].UserID,
           Username: getUser[0].Username,
           Password: getUser[0].Password,
@@ -35,8 +50,22 @@ router.post("/", async (req, res) => {
       let getUser =
         await prisma.$queryRaw`SELECT * FROM User WHERE Username=${inputUser} && Password=${inputPw}`;
 
+      let dataUser = {
+        UserID: getUser[0].UserID,
+        Username: getUser[0].Username,
+        Password: getUser[0].Password,
+        NoTelp: getUser[0].NoTelp.toString(),
+        Email: getUser[0].Email,
+        NamaLengkap: getUser[0].NamaLengkap,
+        Alamat: getUser[0].Alamat,
+        Sekolah: getUser[0].Sekolah,
+        Tipe: getUser[0].Tipe,
+      };
+
+      const tokenUser = jwt.sign(dataUser, process.env.TOKEN_SECRET_1);
       if (getUser.length > 0) {
         let data = {
+          token: tokenUser,
           UserID: getUser[0].UserID,
           Username: getUser[0].Username,
           Password: getUser[0].Password,
