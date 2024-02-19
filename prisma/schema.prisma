@@ -31,3 +31,13 @@ model kode_admin {
   Kode    String @id
   Sekolah String
 }
+
+model buku {
+  BukuID      String   @id
+  Judul       String
+  Penulis     String
+  Penerbit    String
+  Jumlah      Int
+  Sinopsis    String
+  TahunTerbit DateTime
+}
