@@ -10,9 +10,11 @@ app.use(express.json());
 
 const loginController = require("./src/Login/login.controllers");
 const registerController = require("./src/Register/register.controller");
+const booksController = require("./src/Books/books.controller");
 
 app.use("/login", loginController);
 app.use("/register", registerController);
+app.use("/books", booksController);
 
 app.listen(3000, () => {
   console.log("run in port 3000");

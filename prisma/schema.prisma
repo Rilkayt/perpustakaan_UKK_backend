@@ -33,11 +33,12 @@ model kode_admin {
 }
 
 model buku {
-  BukuID      String   @id
+  BukuID      String @id
+  Gambar      String
   Judul       String
   Penulis     String
   Penerbit    String
+  Sinopsis    String @db.Text()
+  TahunTerbit Int
   Jumlah      Int
-  Sinopsis    String
-  TahunTerbit DateTime
 }

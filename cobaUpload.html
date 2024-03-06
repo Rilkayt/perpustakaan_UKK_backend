@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    halo bro
+
+    <section>
+      <form enctype="multipart/form-data">
+        <label for="inputFile"> upload image </label>
+        <input type="file" ref="file" />
+        <button onclick="sendFile()">send</button>
+      </form>
+    </section>
+
+    <script>
+      const fileEdit = this.$refs.file;
+
+      function sendFile() {
+        console.log(this.fileEdit);
+        const formData = new FormData();
+        fetch("localhost:3000/books/add-book", { file: this.fileEdit });
+      }
+    </script>
+  </body>
+</html>
