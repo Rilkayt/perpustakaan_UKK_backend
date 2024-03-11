@@ -42,7 +42,7 @@ model buku {
   Penerbit    String
   Sinopsis    String       @db.Text()
   TahunTerbit Int
-  Jumlah      Int
+  Jumlah      Int          @default(0)
   Kode        kode_admin   @relation(fields: [kode_admin], references: [Kode])
   kode_admin  String
   peminjaman  peminjaman[]
@@ -54,8 +54,8 @@ model peminjaman {
   idUser              String
   BukuID              buku              @relation(fields: [idBuku], references: [BukuID])
   idBuku              String
-  tanggalPeminjaman   DateTime
-  tanggalPengembalian DateTime
+  tanggalPeminjaman   DateTime          @db.Date
+  tanggalPengembalian DateTime          @db.Date
   id                  status_peminjaman @relation(fields: [status], references: [id])
   status              Int
   jumlah              Int

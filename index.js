@@ -34,10 +34,12 @@ const validateUserAdmin = (req, res, next) => {
 const loginController = require("./src/Login/login.controllers");
 const registerController = require("./src/Register/register.controller");
 const booksController = require("./src/Books/books.controller");
+const borrowController = require("./src/Borrow/borrow.controllers");
 
 app.use("/login", loginController);
 app.use("/register", registerController);
 app.use("/books", validateUserAdmin, booksController);
+app.use("/borrow", borrowController);
 
 app.listen(3000, () => {
   console.log("run in port 3000");
