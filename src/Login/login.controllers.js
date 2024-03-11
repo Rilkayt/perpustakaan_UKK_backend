@@ -13,7 +13,9 @@ router.post("/", async (req, res) => {
     if (inputUser.includes("@")) {
       let getUser =
         await prisma.$queryRaw`SELECT * FROM User WHERE Email=${inputUser} && Password=${inputPw}`;
-
+      let getKodeSchool = await prisma.kode_admin.findMany({
+        where: { Sekolah: getUser[0].Sekolah },
+      });
       if (getUser.length > 0) {
         let dataUser = {
           UserID: getUser[0].UserID,
@@ -25,6 +27,7 @@ router.post("/", async (req, res) => {
           Alamat: getUser[0].Alamat,
           Sekolah: getUser[0].Sekolah,
           Tipe: getUser[0].Tipe,
+          kodeSekolah: getKodeSchool[0].Kode,
         };
 
         const tokenUser = jwt.sign(dataUser, process.env.TOKEN_SECRET_1);
@@ -49,6 +52,9 @@ router.post("/", async (req, res) => {
     } else {
       let getUser =
         await prisma.$queryRaw`SELECT * FROM User WHERE Username=${inputUser} && Password=${inputPw}`;
+      let getKodeSchool = await prisma.kode_admin.findMany({
+        where: { Sekolah: getUser[0].Sekolah },
+      });
       if (getUser.length > 0) {
         console.log(getUser);
         let dataUser = {
@@ -61,6 +67,7 @@ router.post("/", async (req, res) => {
           Alamat: getUser[0].Alamat,
           Sekolah: getUser[0].Sekolah,
           Tipe: getUser[0].Tipe,
+          kodeSekolah: getKodeSchool[0].Kode,
         };
 
         const tokenUser = jwt.sign(dataUser, process.env.TOKEN_SECRET_1);

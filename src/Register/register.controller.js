@@ -66,11 +66,11 @@ router.post("/", async (req, res) => {
               response(200, inputRegister, res, "Register Berhasil !");
             });
         } else if (checkUsername > 0) {
-          throw response(400, {}, res, "username sudah tersedia");
+          response(400, {}, res, "username sudah tersedia");
         } else if (checkNotelp > 0) {
-          throw response(400, {}, res, "No telepon sudah tersedia");
+          response(400, {}, res, "No telepon sudah tersedia");
         } else if (checkEmail > 0) {
-          throw response(400, {}, res, "Email sudah tersedia");
+          response(400, {}, res, "Email sudah tersedia");
         }
       } else {
         throw response(
@@ -122,11 +122,11 @@ router.post("/", async (req, res) => {
             response(200, inputRegister, res, "Register Berhasil !");
           });
       } else if (checkUsername > 0) {
-        throw response(400, {}, res, "username sudah tersedia");
+        response(400, {}, res, "username sudah tersedia");
       } else if (checkNotelp > 0) {
-        throw response(400, {}, res, "No telepon sudah tersedia");
+        response(400, {}, res, "No telepon sudah tersedia");
       } else if (checkEmail > 0) {
-        throw response(400, {}, res, "Email sudah tersedia");
+        response(400, {}, res, "Email sudah tersedia");
       }
     } else {
       response(400, {}, res, "otp tidak valid");

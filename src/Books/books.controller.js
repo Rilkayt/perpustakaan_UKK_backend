@@ -1,6 +1,7 @@
 const express = require("express");
 const response = require("../../resTemp");
 const prisma = require("../../db");
+const jwt = require("jsonwebtoken");
 
 const multer = require("multer");
 const fs = require("fs");
@@ -36,10 +37,19 @@ const upload = multer({
   },
 });
 
+const findCodeSchool = (tokenRequest) => {
+  let token = tokenRequest;
+  let splitToken = token.split(" ", 2);
+  token = splitToken[1];
+  const tokenFind = jwt.decode(token);
+  return tokenFind.kodeSekolah;
+};
+
 const router = express.Router();
 
 router.post("/add-book-data", async (req, res) => {
   const data = req.body;
+  const kodeSekolah = findCodeSchool(req.headers.authorization);
 
   if (data.BukuID != "" && data.Judul != "") {
     if (data.Jumlah != 0) {
@@ -61,6 +71,7 @@ router.post("/add-book-data", async (req, res) => {
           Sinopsis: data.Sinopsis,
           TahunTerbit: data.TahunTerbit,
           Jumlah: data.Jumlah,
+          kode_admin: kodeSekolah,
         };
         await prisma.buku
           .create({
@@ -117,6 +128,7 @@ router.put(
 router.put("/update-book/:idBook", async (req, res) => {
   const idBook = req.params.idBook;
   const dataUpdate = req.body;
+  const kodeSekolah = findCodeSchool(req.headers.authorization);
 
   const data = {
     Judul: dataUpdate.Judul,
@@ -125,6 +137,7 @@ router.put("/update-book/:idBook", async (req, res) => {
     Sinopsis: dataUpdate.Sinopsis,
     TahunTerbit: dataUpdate.TahunTerbit,
     Jumlah: dataUpdate.Jumlah,
+    kode_admin: kodeSekolah,
   };
   await prisma.buku
     .update({

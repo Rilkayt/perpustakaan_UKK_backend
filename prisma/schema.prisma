@@ -16,29 +16,53 @@ datasource db {
 // }
 
 model user {
-  UserID      String @id @default(uuid())
+  UserID      String       @id @default(uuid())
   Username    String
   Password    String
   NoTelp      BigInt
   Email       String
   NamaLengkap String
-  Alamat      String @db.Text()
+  Alamat      String       @db.Text()
   Sekolah     String
   Tipe        String
+  peminjaman  peminjaman[]
 }
 
 model kode_admin {
   Kode    String @id
   Sekolah String
+  buku    buku[]
 }
 
 model buku {
-  BukuID      String @id
+  BukuID      String       @id
   Gambar      String
   Judul       String
   Penulis     String
   Penerbit    String
-  Sinopsis    String @db.Text()
+  Sinopsis    String       @db.Text()
   TahunTerbit Int
   Jumlah      Int
+  Kode        kode_admin   @relation(fields: [kode_admin], references: [Kode])
+  kode_admin  String
+  peminjaman  peminjaman[]
+}
+
+model peminjaman {
+  idPeminjaman        String            @id @default(uuid())
+  UserID              user              @relation(fields: [idUser], references: [UserID])
+  idUser              String
+  BukuID              buku              @relation(fields: [idBuku], references: [BukuID])
+  idBuku              String
+  tanggalPeminjaman   DateTime
+  tanggalPengembalian DateTime
+  id                  status_peminjaman @relation(fields: [status], references: [id])
+  status              Int
+  jumlah              Int
+}
+
+model status_peminjaman {
+  id         Int          @id
+  status     String
+  peminjaman peminjaman[]
 }
