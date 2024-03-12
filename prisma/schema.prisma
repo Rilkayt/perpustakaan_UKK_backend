@@ -16,16 +16,17 @@ datasource db {
 // }
 
 model user {
-  UserID      String       @id @default(uuid())
-  Username    String
-  Password    String
-  NoTelp      BigInt
-  Email       String
-  NamaLengkap String
-  Alamat      String       @db.Text()
-  Sekolah     String
-  Tipe        String
-  peminjaman  peminjaman[]
+  UserID          String            @id @default(uuid())
+  Username        String
+  Password        String
+  NoTelp          BigInt
+  Email           String
+  NamaLengkap     String
+  Alamat          String            @db.Text()
+  Sekolah         String
+  Tipe            String
+  peminjaman      peminjaman[]
+  koleksi_pribadi koleksi_pribadi[]
 }
 
 model kode_admin {
@@ -49,6 +50,7 @@ model buku {
   kode_admin           String
   peminjaman           peminjaman[]
   kategori_buku_relasi kategori_buku_relasi[]
+  koleksi_pribadi      koleksi_pribadi[]
 }
 
 model peminjaman {
@@ -71,7 +73,7 @@ model status_peminjaman {
 }
 
 model kategori_buku {
-  idKategori           String                 @id @default(cuid())
+  idKategori           String                 @id
   nama                 String
   Kode                 kode_admin             @relation(fields: [kodeAdmin], references: [Kode])
   kodeAdmin            String
@@ -86,4 +88,12 @@ model kategori_buku_relasi {
   idKategoriID     String
   Kode             kode_admin    @relation(fields: [kodeAdmin], references: [Kode])
   kodeAdmin        String
+}
+
+model koleksi_pribadi {
+  koleksiID String @id @default(cuid())
+  UserID    user   @relation(fields: [idUser], references: [UserID])
+  idUser    String
+  BukuID    buku   @relation(fields: [idBuku], references: [BukuID])
+  idBuku    String
 }
