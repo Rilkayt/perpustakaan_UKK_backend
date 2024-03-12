@@ -35,6 +35,7 @@ model kode_admin {
   buku                 buku[]
   kategori_buku        kategori_buku[]
   kategori_buku_relasi kategori_buku_relasi[]
+  koleksi_pribadi      koleksi_pribadi[]
 }
 
 model buku {
@@ -91,9 +92,11 @@ model kategori_buku_relasi {
 }
 
 model koleksi_pribadi {
-  koleksiID String @id @default(cuid())
-  UserID    user   @relation(fields: [idUser], references: [UserID])
+  koleksiID String     @id @default(cuid())
+  UserID    user       @relation(fields: [idUser], references: [UserID])
   idUser    String
-  BukuID    buku   @relation(fields: [idBuku], references: [BukuID])
+  BukuID    buku       @relation(fields: [idBuku], references: [BukuID])
   idBuku    String
+  Kode      kode_admin @relation(fields: [kodeAdmin], references: [Kode])
+  kodeAdmin String
 }

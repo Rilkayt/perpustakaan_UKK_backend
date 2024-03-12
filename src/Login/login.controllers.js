@@ -52,42 +52,46 @@ router.post("/", async (req, res) => {
     } else {
       let getUser =
         await prisma.$queryRaw`SELECT * FROM User WHERE Username=${inputUser} && Password=${inputPw}`;
-      let getKodeSchool = await prisma.kode_admin.findMany({
-        where: { Sekolah: getUser[0].Sekolah },
-      });
       if (getUser.length > 0) {
-        console.log(getUser);
-        let dataUser = {
-          UserID: getUser[0].UserID,
-          Username: getUser[0].Username,
-          Password: getUser[0].Password,
-          NoTelp: getUser[0].NoTelp.toString(),
-          Email: getUser[0].Email,
-          NamaLengkap: getUser[0].NamaLengkap,
-          Alamat: getUser[0].Alamat,
-          Sekolah: getUser[0].Sekolah,
-          Tipe: getUser[0].Tipe,
-          kodeSekolah: getKodeSchool[0].Kode,
-        };
+        let getKodeSchool = await prisma.kode_admin.findMany({
+          where: { Sekolah: getUser[0].Sekolah },
+        });
+        if (getUser.length > 0) {
+          console.log(getUser);
+          let dataUser = {
+            UserID: getUser[0].UserID,
+            Username: getUser[0].Username,
+            Password: getUser[0].Password,
+            NoTelp: getUser[0].NoTelp.toString(),
+            Email: getUser[0].Email,
+            NamaLengkap: getUser[0].NamaLengkap,
+            Alamat: getUser[0].Alamat,
+            Sekolah: getUser[0].Sekolah,
+            Tipe: getUser[0].Tipe,
+            kodeSekolah: getKodeSchool[0].Kode,
+          };
 
-        const tokenUser = jwt.sign(dataUser, process.env.TOKEN_SECRET_1);
+          const tokenUser = jwt.sign(dataUser, process.env.TOKEN_SECRET_1);
 
-        let data = {
-          token: tokenUser,
-          UserID: getUser[0].UserID,
-          Username: getUser[0].Username,
-          Password: getUser[0].Password,
-          NoTelp: getUser[0].NoTelp.toString(),
-          Email: getUser[0].Email,
-          NamaLengkap: getUser[0].NamaLengkap,
-          Alamat: getUser[0].Alamat,
-          Sekolah: getUser[0].Sekolah,
-          Tipe: getUser[0].Tipe,
-        };
+          let data = {
+            token: tokenUser,
+            UserID: getUser[0].UserID,
+            Username: getUser[0].Username,
+            Password: getUser[0].Password,
+            NoTelp: getUser[0].NoTelp.toString(),
+            Email: getUser[0].Email,
+            NamaLengkap: getUser[0].NamaLengkap,
+            Alamat: getUser[0].Alamat,
+            Sekolah: getUser[0].Sekolah,
+            Tipe: getUser[0].Tipe,
+          };
 
-        response(200, data, res, "Berhasil Login");
+          response(200, data, res, "Berhasil Login");
+        } else {
+          response(400, {}, res, "Data Tidak Ditemukan");
+        }
       } else {
-        response(400, {}, res, "Data Tidak Ditemukan");
+        response(400, {}, res, "user tidak ditemukan");
       }
     }
   } else if (inputUser == "" && inputPw == "") {
