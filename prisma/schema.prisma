@@ -27,6 +27,7 @@ model user {
   Tipe            String
   peminjaman      peminjaman[]
   koleksi_pribadi koleksi_pribadi[]
+  ulasan_buku     ulasan_buku[]
 }
 
 model kode_admin {
@@ -36,6 +37,7 @@ model kode_admin {
   kategori_buku        kategori_buku[]
   kategori_buku_relasi kategori_buku_relasi[]
   koleksi_pribadi      koleksi_pribadi[]
+  ulasan_buku          ulasan_buku[]
 }
 
 model buku {
@@ -52,6 +54,7 @@ model buku {
   peminjaman           peminjaman[]
   kategori_buku_relasi kategori_buku_relasi[]
   koleksi_pribadi      koleksi_pribadi[]
+  ulasan_buku          ulasan_buku[]
 }
 
 model peminjaman {
@@ -99,4 +102,16 @@ model koleksi_pribadi {
   idBuku    String
   Kode      kode_admin @relation(fields: [kodeAdmin], references: [Kode])
   kodeAdmin String
+}
+
+model ulasan_buku {
+  ulasanID  String     @id @default(uuid())
+  UserID    user       @relation(fields: [idUser], references: [UserID])
+  idUser    String
+  BukuID    buku       @relation(fields: [idBuku], references: [BukuID])
+  idBuku    String
+  Kode      kode_admin @relation(fields: [kodeAdmin], references: [Kode])
+  kodeAdmin String
+  pesan     String     @db.Text
+  rating    Int
 }

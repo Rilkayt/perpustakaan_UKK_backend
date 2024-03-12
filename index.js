@@ -37,6 +37,7 @@ const booksController = require("./src/Books/books.controller");
 const borrowController = require("./src/Borrow/borrow.controllers");
 const categoryController = require("./src/Kategori/kategori.controllers");
 const collectionController = require("./src/collection/collection.controllers");
+const ulasanController = require("./src/Ulasan/ulasan.controllers");
 
 app.use("/login", loginController);
 app.use("/register", registerController);
@@ -44,6 +45,7 @@ app.use("/books", validateUserAdmin, booksController);
 app.use("/borrow", borrowController);
 app.use("/category", categoryController);
 app.use("/collection", collectionController);
+app.use("/ulasan", ulasanController);
 
 app.listen(3000, () => {
   console.log("run in port 3000");
