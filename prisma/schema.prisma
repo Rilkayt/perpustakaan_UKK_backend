@@ -29,23 +29,26 @@ model user {
 }
 
 model kode_admin {
-  Kode    String @id
-  Sekolah String
-  buku    buku[]
+  Kode                 String                 @id
+  Sekolah              String
+  buku                 buku[]
+  kategori_buku        kategori_buku[]
+  kategori_buku_relasi kategori_buku_relasi[]
 }
 
 model buku {
-  BukuID      String       @id
-  Gambar      String
-  Judul       String
-  Penulis     String
-  Penerbit    String
-  Sinopsis    String       @db.Text()
-  TahunTerbit Int
-  Jumlah      Int          @default(0)
-  Kode        kode_admin   @relation(fields: [kode_admin], references: [Kode])
-  kode_admin  String
-  peminjaman  peminjaman[]
+  BukuID               String                 @id
+  Gambar               String
+  Judul                String
+  Penulis              String
+  Penerbit             String
+  Sinopsis             String                 @db.Text()
+  TahunTerbit          Int
+  Jumlah               Int                    @default(0)
+  Kode                 kode_admin             @relation(fields: [kode_admin], references: [Kode])
+  kode_admin           String
+  peminjaman           peminjaman[]
+  kategori_buku_relasi kategori_buku_relasi[]
 }
 
 model peminjaman {
@@ -65,4 +68,22 @@ model status_peminjaman {
   id         Int          @id
   status     String
   peminjaman peminjaman[]
+}
+
+model kategori_buku {
+  idKategori           String                 @id @default(cuid())
+  nama                 String
+  Kode                 kode_admin             @relation(fields: [kodeAdmin], references: [Kode])
+  kodeAdmin            String
+  kategori_buku_relasi kategori_buku_relasi[]
+}
+
+model kategori_buku_relasi {
+  idKategoriRelasi String        @id @default(uuid())
+  BukuID           buku          @relation(fields: [idBuku], references: [BukuID])
+  idBuku           String
+  idKategori       kategori_buku @relation(fields: [idKategoriID], references: [idKategori])
+  idKategoriID     String
+  Kode             kode_admin    @relation(fields: [kodeAdmin], references: [Kode])
+  kodeAdmin        String
 }

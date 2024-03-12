@@ -32,33 +32,81 @@ router.post("/:idBook", async (req, res) => {
   const { tanggal_peminjaman, tanggal_pengembalian, jumlah } = req.body;
   let dataUser = findCodeSchool(req.headers.authorization);
 
-  let idPinjam = createIdPeminjaman(
-    dataUser,
-    tanggal_peminjaman,
-    tanggal_pengembalian
-  );
+  const stokBook = await prisma.buku.findMany({ where: { BukuID: idBook } });
+  console.log(stokBook);
+  if (stokBook[0].Jumlah > 0) {
+    let idPinjam = createIdPeminjaman(
+      dataUser,
+      tanggal_peminjaman,
+      tanggal_pengembalian
+    );
 
-  const tglPinjam = new Date(tanggal_peminjaman);
-  const tglKembali = new Date(tanggal_pengembalian);
-  console.log({ tglPinjam });
+    const tglPinjam = new Date(tanggal_peminjaman);
+    const tglKembali = new Date(tanggal_pengembalian);
+    // console.log({ tglPinjam });
 
-  const data = {
-    idPeminjaman: idPinjam,
-    idUser: dataUser.UserID,
-    idBuku: idBook,
-    tanggalPeminjaman: tglPinjam,
-    tanggalPengembalian: tglKembali,
-    status: 1,
-    jumlah: jumlah,
-  };
-  //   console.log(dataUser);
-  await prisma.peminjaman
-    .create({
-      data: data,
-    })
-    .then((a) => {
-      response(200, a, res, "berhasil melakukan peminjaman");
-    });
+    const data = {
+      idPeminjaman: idPinjam,
+      idUser: dataUser.UserID,
+      idBuku: idBook,
+      tanggalPeminjaman: tglPinjam,
+      tanggalPengembalian: tglKembali,
+      status: 1,
+      jumlah: jumlah,
+    };
+    //   console.log(dataUser);
+    await prisma.peminjaman
+      .create({
+        data: data,
+      })
+      .then((a) => {
+        response(200, a, res, "berhasil melakukan peminjaman");
+      });
+  } else {
+    response(500, {}, res, "stok buku sedang habis");
+  }
+});
+
+router.put("/change-status/:idPeminjaman/:kodeStatus", async (req, res) => {
+  const idPinjam = req.params.idPeminjaman;
+  const kodeStatus = parseInt(req.params.kodeStatus);
+
+  const ValidateID = await prisma.peminjaman.count({
+    where: { idPeminjaman: idPinjam },
+  });
+
+  if (ValidateID > 0) {
+    await prisma.peminjaman
+      .update({
+        where: { idPeminjaman: idPinjam },
+        data: { status: kodeStatus },
+      })
+      .then(async (a) => {
+        let dataPinjamBuku = await prisma.peminjaman.findMany({
+          where: { idPeminjaman: idPinjam },
+        });
+        const jumlahBukuAwal = await prisma.buku.findMany({
+          where: { BukuID: dataPinjamBuku[0].idBuku },
+        });
+        if (dataPinjamBuku[0].status === 2) {
+          let jumlahBukuSekarang =
+            jumlahBukuAwal[0].Jumlah - dataPinjamBuku[0].jumlah;
+          await prisma.buku.update({
+            where: { BukuID: dataPinjamBuku[0].idBuku },
+            data: { Jumlah: jumlahBukuSekarang },
+          });
+        } else if (dataPinjamBuku[0].status === 3) {
+          let jumlahBukuSekarang =
+            jumlahBukuAwal[0].Jumlah + dataPinjamBuku[0].jumlah;
+          await prisma.buku.update({
+            where: { BukuID: dataPinjamBuku[0].idBuku },
+            data: { Jumlah: jumlahBukuSekarang },
+          });
+        }
+        console.log(dataPinjamBuku);
+        response(200, a, res, "berhasil mengubah status");
+      });
+  }
 });
 
 module.exports = router;
