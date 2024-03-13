@@ -25,6 +25,7 @@ model user {
   Alamat          String            @db.Text()
   Sekolah         String
   Tipe            String
+  ProfilAkun      String
   peminjaman      peminjaman[]
   koleksi_pribadi koleksi_pribadi[]
   ulasan_buku     ulasan_buku[]

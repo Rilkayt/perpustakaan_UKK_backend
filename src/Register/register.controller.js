@@ -60,6 +60,7 @@ router.post("/", async (req, res) => {
                 Alamat: inputRegister.alamat,
                 Sekolah: inputRegister.sekolah,
                 Tipe: inputRegister.tipe,
+                ProfilAkun: "./imageFile/avatarProfile/default-profile.jpg",
               },
             })
             .then(() => {
@@ -116,6 +117,7 @@ router.post("/", async (req, res) => {
               Alamat: inputRegister.alamat,
               Sekolah: inputRegister.sekolah,
               Tipe: inputRegister.tipe,
+              ProfilAkun: "./imageFile/avatarProfile/default-profile.jpg",
             },
           })
           .then(() => {

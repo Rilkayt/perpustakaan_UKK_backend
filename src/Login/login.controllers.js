@@ -13,41 +13,45 @@ router.post("/", async (req, res) => {
     if (inputUser.includes("@")) {
       let getUser =
         await prisma.$queryRaw`SELECT * FROM User WHERE Email=${inputUser} && Password=${inputPw}`;
-      let getKodeSchool = await prisma.kode_admin.findMany({
-        where: { Sekolah: getUser[0].Sekolah },
-      });
-      if (getUser.length > 0) {
-        let dataUser = {
-          UserID: getUser[0].UserID,
-          Username: getUser[0].Username,
-          Password: getUser[0].Password,
-          NoTelp: getUser[0].NoTelp.toString(),
-          Email: getUser[0].Email,
-          NamaLengkap: getUser[0].NamaLengkap,
-          Alamat: getUser[0].Alamat,
-          Sekolah: getUser[0].Sekolah,
-          Tipe: getUser[0].Tipe,
-          kodeSekolah: getKodeSchool[0].Kode,
-        };
-
-        const tokenUser = jwt.sign(dataUser, process.env.TOKEN_SECRET_1);
-
-        let data = {
-          token: tokenUser,
-          UserID: getUser[0].UserID,
-          Username: getUser[0].Username,
-          Password: getUser[0].Password,
-          NoTelp: getUser[0].NoTelp.toString(),
-          Email: getUser[0].Email,
-          NamaLengkap: getUser[0].NamaLengkap,
-          Alamat: getUser[0].Alamat,
-          Sekolah: getUser[0].Sekolah,
-          Tipe: getUser[0].Tipe,
-        };
-
-        response(200, data, res, "Berhasil Login");
+      if (getUser.length === 0) {
+        response(400, {}, res, "user tidak ditemukan");
       } else {
-        response(400, {}, res, "Data Tidak Ditemukan");
+        let getKodeSchool = await prisma.kode_admin.findMany({
+          where: { Sekolah: getUser[0].Sekolah },
+        });
+        if (getUser.length > 0) {
+          let dataUser = {
+            UserID: getUser[0].UserID,
+            Username: getUser[0].Username,
+            Password: getUser[0].Password,
+            NoTelp: getUser[0].NoTelp.toString(),
+            Email: getUser[0].Email,
+            NamaLengkap: getUser[0].NamaLengkap,
+            Alamat: getUser[0].Alamat,
+            Sekolah: getUser[0].Sekolah,
+            Tipe: getUser[0].Tipe,
+            kodeSekolah: getKodeSchool[0].Kode,
+          };
+
+          const tokenUser = jwt.sign(dataUser, process.env.TOKEN_SECRET_1);
+
+          let data = {
+            token: tokenUser,
+            UserID: getUser[0].UserID,
+            Username: getUser[0].Username,
+            Password: getUser[0].Password,
+            NoTelp: getUser[0].NoTelp.toString(),
+            Email: getUser[0].Email,
+            NamaLengkap: getUser[0].NamaLengkap,
+            Alamat: getUser[0].Alamat,
+            Sekolah: getUser[0].Sekolah,
+            Tipe: getUser[0].Tipe,
+          };
+
+          response(200, data, res, "Berhasil Login");
+        } else {
+          response(400, {}, res, "Data Tidak Ditemukan");
+        }
       }
     } else {
       let getUser =
