@@ -42,7 +42,7 @@ const validateUser = (req, res, next) => {
       response(401, {}, res, "token tidak valid");
     } else {
       if (decode.Tipe != "ADMIN" && decode.Tipe != "EMPLOYEE") {
-        response(400, {}, res, "USER tidak diperkenankan");
+        response(401, {}, res, "USER tidak diperkenankan");
       } else {
         next();
       }

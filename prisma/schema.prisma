@@ -38,6 +38,7 @@ model kode_admin {
   kategori_buku_relasi kategori_buku_relasi[]
   koleksi_pribadi      koleksi_pribadi[]
   ulasan_buku          ulasan_buku[]
+  peminjaman           peminjaman[]
 }
 
 model buku {
@@ -68,6 +69,8 @@ model peminjaman {
   id                  status_peminjaman @relation(fields: [status], references: [id])
   status              Int
   jumlah              Int
+  Kode                kode_admin        @relation(fields: [kodeAdmin], references: [Kode])
+  kodeAdmin           String
 }
 
 model status_peminjaman {

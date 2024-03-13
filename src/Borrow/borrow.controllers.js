@@ -53,6 +53,7 @@ router.post("/:idBook", async (req, res) => {
       tanggalPengembalian: tglKembali,
       status: 1,
       jumlah: jumlah,
+      kodeAdmin: dataUser.kodeSekolah,
     };
     //   console.log(dataUser);
     await prisma.peminjaman

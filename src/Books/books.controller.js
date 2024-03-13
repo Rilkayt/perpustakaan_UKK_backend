@@ -45,6 +45,14 @@ const findCodeSchool = (tokenRequest) => {
   return tokenFind.kodeSekolah;
 };
 
+const findDataUser = (tokenRequest) => {
+  let token = tokenRequest;
+  let splitToken = token.split(" ", 2);
+  token = splitToken[1];
+  const tokenFind = jwt.decode(token);
+  return tokenFind;
+};
+
 const router = express.Router();
 
 router.post("/add-book-data", async (req, res) => {
