@@ -250,6 +250,70 @@ router.get("/dashboard", async (req, res) => {
       buku: book,
     };
     response(200, dataDashboard, res, "berhasil mendapatkan data");
+  } else if (dataUser.Tipe != "USER") {
+    let totalAkunUser = 0;
+    let totalAkunPetugas = 0;
+    let totalBukuDipinjam = 0;
+    let mostBookBorrow = [];
+
+    await prisma.user
+      .count({ where: { Sekolah: dataUser.Sekolah, Tipe: "USER" } })
+      .then((a) => {
+        totalAkunUser += a;
+      });
+
+    await prisma.user
+      .count({ where: { Sekolah: dataUser.Sekolah, Tipe: "EMPLOYEE" } })
+      .then((a) => {
+        totalAkunPetugas += a;
+      });
+
+    await prisma.peminjaman
+      .count({
+        where: { kodeAdmin: dataUser.kodeAdmin, status: 2 },
+      })
+      .then((a) => {
+        totalBukuDipinjam += a;
+      });
+
+    // buku populer
+    await prisma.$queryRaw`SELECT idBuku,SUM(jumlah) AS totalPinjam FROM peminjaman GROUP BY idBuku ORDER BY totalPinjam DESC LIMIT 20;`.then(
+      async (a) => {
+        console.log(a);
+        for (let i = 0; i < a.length; i++) {
+          await prisma.buku
+            .findFirst({
+              where: { BukuID: a[i].idBuku, kode_admin: dataUser.kodeSekolah },
+            })
+            .then((b) => {
+              let data = [
+                {
+                  buku: b,
+                  jumlahPinjam: parseInt(a[i].totalPinjam),
+                },
+              ];
+              mostBookBorrow = mostBookBorrow.concat(data);
+            });
+        }
+      }
+    );
+
+    let dataDashboard = {
+      UserID: dataUser.UserID,
+      Username: dataUser.Username,
+      NoTelp: dataUser.NoTelp,
+      Email: dataUser.Email,
+      NamaLengkap: dataUser.NamaLengkap,
+      Alamat: dataUser.Alamat,
+      Sekolah: dataUser.Sekolah,
+      ProfilAkun: dataUser.ProfilAkun,
+      TotalAkunUser: totalAkunUser,
+      TotalAkunPetugas: totalAkunPetugas,
+      TotalBukuMasihDipinjam: totalBukuDipinjam,
+      BukuPopuler: mostBookBorrow,
+    };
+
+    response(200, dataDashboard, res, "berhasil mendapatkan data");
   }
 });
 
