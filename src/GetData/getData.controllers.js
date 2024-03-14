@@ -145,4 +145,112 @@ router.get("/ulasan/:idBook", async (req, res) => {
   }
 });
 
+router.get("/dashboard", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+  // console.log(dataUser);
+
+  if (dataUser.Tipe === "USER") {
+    let collection = [];
+    let book = [];
+    let pjmBook = [];
+
+    // peminjaman
+    await prisma.peminjaman
+      .findMany({
+        where: {
+          idUser: dataUser.UserID,
+          kodeAdmin: dataUser.kodeSekolah,
+          status: 2,
+        },
+      })
+      .then(async (a) => {
+        if (a.length > 0) {
+          for (let i = 0; i < a.length; i++) {
+            let data = {
+              idPeminjaman: a[i].idPeminjaman,
+              tanggalPeminjaman: a[i].tanggalPeminjaman,
+              tanggalPengembalian: a[i].tanggalPengembalian,
+              status: await prisma.status_peminjaman.findMany({
+                select: { status: true },
+                where: { id: a[i].status },
+              }),
+              jumlah: a[i].jumlah,
+              buku: await prisma.buku.findMany({
+                where: {
+                  BukuID: a[i].idBuku,
+                  kode_admin: dataUser.kodeSekolah,
+                },
+              }),
+            };
+            pjmBook = pjmBook.concat(data);
+          }
+        } else {
+          pjmBook = [];
+        }
+      });
+
+    // koleksi
+    await prisma.koleksi_pribadi
+      .findMany({
+        where: { idUser: dataUser.UserID, kodeAdmin: dataUser.kodeSekolah },
+      })
+      .then(async (a) => {
+        console.log(a.length);
+        for (let i = 0; i < a.length; i++) {
+          let data = await prisma.buku.findMany({
+            where: { BukuID: a[i].idBuku, kode_admin: dataUser.kodeSekolah },
+          });
+
+          collection = collection.concat(data);
+        }
+      });
+
+    // buku
+    await prisma.$queryRaw`SELECT * FROM buku WHERE kode_admin=${dataUser.kodeSekolah}  ORDER BY RAND() LIMIT 20`.then(
+      (a) => {
+        for (let i = 0; i < a.length; i++) {
+          book = book.concat(a[i]);
+        }
+      }
+    );
+
+    let noTelpAdmin = [];
+    await prisma.user
+      .findMany({
+        select: { NoTelp: true },
+        where: { Sekolah: dataUser.Sekolah, Tipe: "ADMIN" },
+      })
+      .then((a) => {
+        for (let i = 0; i < a.length; i++) {
+          let noTelp = a[i].NoTelp;
+          let noTelpConvert = `62${noTelp.toString()}`;
+          noTelpAdmin = noTelpAdmin.concat(noTelpConvert);
+        }
+      });
+
+    let noTelpEmployee = [];
+    await prisma.user
+      .findMany({
+        select: { NoTelp: true },
+        where: { Sekolah: dataUser.Sekolah, Tipe: "EMPLOYEE" },
+      })
+      .then((a) => {
+        for (let i = 0; i < a.length; i++) {
+          let noTelp = a[i].NoTelp;
+          let noTelpConvert = `62${noTelp.toString()}`;
+          noTelpEmployee = noTelpEmployee.concat(noTelpConvert);
+        }
+      });
+    let dataDashboard = {
+      user: dataUser,
+      peminjaman: pjmBook,
+      koleksiBuku: collection,
+      noTelponAdmin: noTelpAdmin,
+      noTelpEmployee: noTelpEmployee,
+      buku: book,
+    };
+    response(200, dataDashboard, res, "berhasil mendapatkan data");
+  }
+});
+
 module.exports = router;

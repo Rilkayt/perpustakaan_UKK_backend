@@ -30,24 +30,25 @@ const validateUserAdmin = (req, res, next) => {
   });
   // console.log(tokenValidate);
 };
+
 const validateUser = (req, res, next) => {
-  let token = req.headers.authorization;
-  let splitToken = token.split(" ", 2);
-  token = splitToken[1];
+  if (req.headers.authorization) {
+    let token = req.headers.authorization;
+    let splitToken = token.split(" ", 2);
+    token = splitToken[1];
 
-  // console.log(process.env.TOKEN_SECRET_1);
+    // console.log(process.env.TOKEN_SECRET_1);
 
-  jwt.verify(token, process.env.TOKEN_SECRET_1, (err, decode) => {
-    if (err) {
-      response(401, {}, res, "token tidak valid");
-    } else {
-      if (decode.Tipe != "ADMIN" && decode.Tipe != "EMPLOYEE") {
-        response(401, {}, res, "USER tidak diperkenankan");
+    jwt.verify(token, process.env.TOKEN_SECRET_1, (err, decode) => {
+      if (err) {
+        response(401, {}, res, "token tidak valid");
       } else {
         next();
       }
-    }
-  });
+    });
+  } else {
+    response(401, {}, res, "token tidak ditemukan");
+  }
   // console.log(tokenValidate);
 };
 
@@ -63,11 +64,11 @@ const getDataController = require("./src/GetData/getData.controllers");
 app.use("/login", loginController);
 app.use("/register", registerController);
 app.use("/books", validateUserAdmin, booksController);
-app.use("/borrow", borrowController);
-app.use("/category", categoryController);
-app.use("/collection", collectionController);
-app.use("/ulasan", ulasanController);
-app.use("/get-data", getDataController);
+app.use("/borrow", validateUser, borrowController);
+app.use("/category", validateUser, categoryController);
+app.use("/collection", validateUser, collectionController);
+app.use("/ulasan", validateUser, ulasanController);
+app.use("/get-data", validateUser, getDataController);
 
 app.listen(3000, () => {
   console.log("run in port 3000");
