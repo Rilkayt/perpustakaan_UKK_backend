@@ -2,6 +2,15 @@ const express = require("express");
 const response = require("../../resTemp");
 const prisma = require("../../db");
 const nodemailer = require("nodemailer");
+const jwt = require("jsonwebtoken");
+
+const findDataUser = (tokenRequest) => {
+  let token = tokenRequest;
+  let splitToken = token.split(" ", 2);
+  token = splitToken[1];
+  const tokenFind = jwt.decode(token);
+  return tokenFind;
+};
 
 const router = express.Router();
 
@@ -166,6 +175,97 @@ router.post("/send-otp", async (req, res) => {
   } catch (error) {
     response(400, {}, res, "terjadi kesalahan pada system");
   }
+});
+
+router.post("/add-employee", async (req, res) => {
+  const inputRegister = req.body;
+  const dataUser = await findDataUser(req.headers.authorization);
+
+  let checkUsername = await prisma.user.count({
+    where: {
+      Username: inputRegister.username,
+    },
+  });
+
+  let checkEmail = await prisma.user.count({
+    where: {
+      Email: inputRegister.email,
+    },
+  });
+
+  let checkNotelp = await prisma.user.count({
+    where: {
+      NoTelp: inputRegister.notelp,
+    },
+  });
+
+  if (checkUsername == 0 && checkEmail == 0 && checkNotelp == 0) {
+    await prisma.user
+      .create({
+        data: {
+          Username: inputRegister.username,
+          Password: inputRegister.password,
+          NoTelp: inputRegister.notelp,
+          Email: inputRegister.email,
+          NamaLengkap: inputRegister.namaLengkap,
+          Alamat: inputRegister.alamat,
+          Sekolah: dataUser.Sekolah,
+          Tipe: "EMPLOYEE",
+          ProfilAkun: "./imageFile/avatarProfile/default-profile.jpg",
+        },
+      })
+      .then(() => {
+        response(200, inputRegister, res, "Register Berhasil !");
+      });
+  } else if (checkUsername > 0) {
+    response(400, {}, res, "username sudah tersedia");
+  } else if (checkNotelp > 0) {
+    response(400, {}, res, "No telepon sudah tersedia");
+  } else if (checkEmail > 0) {
+    response(400, {}, res, "Email sudah tersedia");
+  }
+});
+
+router.post("/check-user", async (req, res) => {
+  const inputRegister = req.body;
+  let checkUsername = await prisma.user.count({
+    where: {
+      Username: inputRegister.username,
+    },
+  });
+
+  let checkEmail = await prisma.user.count({
+    where: {
+      Email: inputRegister.email,
+    },
+  });
+
+  let checkNotelp = await prisma.user.count({
+    where: {
+      NoTelp: inputRegister.notelp,
+    },
+  });
+
+  if (checkUsername == 0 && checkEmail == 0 && checkNotelp == 0) {
+    response(200, {}, res, "data bisa di daftarkan");
+  } else if (checkUsername > 0) {
+    response(400, {}, res, "username sudah tersedia");
+  } else if (checkNotelp > 0) {
+    response(400, {}, res, "No telepon sudah tersedia");
+  } else if (checkEmail > 0) {
+    response(400, {}, res, "Email sudah tersedia");
+  }
+});
+
+router.get("/school", async (req, res) => {
+  await prisma.kode_admin.findMany().then((a) => {
+    response(
+      200,
+      a,
+      res,
+      a.length > 0 ? "Berhasil Mendapat data" : "Data belum ada"
+    );
+  });
 });
 
 module.exports = router;

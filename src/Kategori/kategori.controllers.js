@@ -28,15 +28,23 @@ router.post("/add-category-book", async (req, res) => {
   const { nameCategory } = req.body;
   const idCategory = createCategoryID(nameCategory);
   if (nameCategory != "") {
-    let data = {
-      idKategori: idCategory,
-      nama: nameCategory,
-      kodeAdmin: kodeAdmin,
-    };
+    await prisma.kategori_buku
+      .count({ where: { nama: nameCategory, kodeAdmin: kodeAdmin } })
+      .then(async (a) => {
+        if (a < 1) {
+          let data = {
+            idKategori: idCategory,
+            nama: nameCategory,
+            kodeAdmin: kodeAdmin,
+          };
 
-    await prisma.kategori_buku.create({ data: data }).then((a) => {
-      response(200, a, res, "berhasil menambah kategori buku");
-    });
+          await prisma.kategori_buku.create({ data: data }).then((a) => {
+            response(200, a, res, "berhasil menambah kategori buku");
+          });
+        } else {
+          response(400, a, res, "kategori sudah tersedia");
+        }
+      });
   } else {
     response(400, {}, res, "nama tidak boleh kosong");
   }
@@ -119,5 +127,24 @@ router.post("/add-category-book/:idBook/:idCategori", async (req, res) => {
     response(400, {}, res, "buku telah berada di kategori");
   }
 });
+
+router.delete(
+  "/delete-book-from-category/:idKategoriRelasi",
+  async (req, res) => {
+    const idCategory = req.params.idKategoriRelasi;
+    const kodeAdmin = findCodeSchool(req.headers.authorization);
+
+    await prisma.kategori_buku_relasi
+      .delete({
+        where: {
+          idKategoriRelasi: idCategory,
+          kodeAdmin: kodeAdmin,
+        },
+      })
+      .then((a) => {
+        response(200, a, res, "berhasil menghapus buku dari kategori");
+      });
+  }
+);
 
 module.exports = router;

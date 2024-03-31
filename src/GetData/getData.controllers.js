@@ -27,10 +27,51 @@ router.get("/books", async (req, res) => {
         skip: skipData,
         where: { kode_admin: dataUser.kodeSekolah },
       })
-      .then((a) => {
+      .then(async (a) => {
+        console.log(a);
+        let dataBook = [];
+        for (let i = 0; i < a.length; i++) {
+          const dataBukuKategori = await prisma.kategori_buku_relasi.findMany({
+            where: { idBuku: a[i].BukuID },
+          });
+          if (dataBukuKategori.length > 0) {
+            let data = [
+              {
+                BukuID: a[i].BukuID,
+                Gambar: a[i].Gambar,
+                Judul: a[i].Judul,
+                Penulis: a[i].Penulis,
+                Penerbit: a[i].Penerbit,
+                Sinopsis: a[i].Penerbit,
+                TahunTerbit: a[i].TahunTerbit,
+                Jumlah: a[i].Jumlah,
+                kode_admin: a[i].kode_admin,
+                kategori: dataBukuKategori,
+              },
+            ];
+            dataBook = dataBook.concat(data);
+          } else {
+            let data = [
+              {
+                BukuID: a[i].BukuID,
+                Gambar: a[i].Gambar,
+                Judul: a[i].Judul,
+                Penulis: a[i].Penulis,
+                Penerbit: a[i].Penerbit,
+                Sinopsis: a[i].Penerbit,
+                TahunTerbit: a[i].TahunTerbit,
+                Jumlah: a[i].Jumlah,
+                kode_admin: a[i].kode_admin,
+                kategori: [],
+              },
+            ];
+            dataBook = dataBook.concat(data);
+          }
+        }
+
         response(
           200,
-          { count: a.length, daftarBuku: a },
+          { count: a.length, daftarBuku: dataBook },
           res,
           a.length == 0
             ? "buku sudah tidak tersedia / sudah max"
@@ -107,16 +148,16 @@ router.get("/ulasan/:idBook", async (req, res) => {
         let sumRating = 0;
         let sumAkun = 0;
         let dataUlasan = [];
-        console.log({ a: a.length });
+        // console.log({ a: a.length });
         for (let i = 0; i < a.length; i++) {
           sumRating += a[i].rating;
-          console.log({ sumRating });
+          // console.log({ sumRating });
           sumAkun += i + 1;
-          console.log({ sumAkun });
+          // console.log({ sumAkun });
           let dataUser = await prisma.user.findMany({
             where: { UserID: a[i].idUser },
           });
-          console.log(dataUser);
+          // console.log(dataUser);
           let data = [
             {
               username: dataUser[0].Username,
@@ -126,9 +167,9 @@ router.get("/ulasan/:idBook", async (req, res) => {
             },
           ];
           dataUlasan = dataUlasan.concat(data);
-          console.log(data);
+          // console.log(data);
         }
-        console.log(dataUlasan);
+        // console.log(dataUlasan);
         // console.log({ sumRating, sumAkun });
         let avgRating = Math.floor(sumRating / dataUlasan.length);
 
@@ -195,7 +236,7 @@ router.get("/dashboard", async (req, res) => {
         where: { idUser: dataUser.UserID, kodeAdmin: dataUser.kodeSekolah },
       })
       .then(async (a) => {
-        console.log(a.length);
+        // console.log(a.length);
         for (let i = 0; i < a.length; i++) {
           let data = await prisma.buku.findMany({
             where: { BukuID: a[i].idBuku, kode_admin: dataUser.kodeSekolah },
@@ -279,7 +320,7 @@ router.get("/dashboard", async (req, res) => {
     // buku populer
     await prisma.$queryRaw`SELECT idBuku,SUM(jumlah) AS totalPinjam FROM peminjaman GROUP BY idBuku ORDER BY totalPinjam DESC LIMIT 20;`.then(
       async (a) => {
-        console.log(a);
+        // console.log(a);
         for (let i = 0; i < a.length; i++) {
           await prisma.buku
             .findFirst({

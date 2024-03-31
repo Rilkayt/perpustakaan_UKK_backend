@@ -17,10 +17,10 @@ datasource db {
 
 model user {
   UserID          String            @id @default(uuid())
-  Username        String
+  Username        String            @unique
   Password        String
   NoTelp          BigInt
-  Email           String
+  Email           String            @unique
   NamaLengkap     String
   Alamat          String            @db.Text()
   Sekolah         String
