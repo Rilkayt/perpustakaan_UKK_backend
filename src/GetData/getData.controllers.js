@@ -340,13 +340,7 @@ router.get("/dashboard", async (req, res) => {
     );
 
     let dataDashboard = {
-      UserID: dataUser.UserID,
-      Username: dataUser.Username,
-      NoTelp: dataUser.NoTelp,
-      Email: dataUser.Email,
-      NamaLengkap: dataUser.NamaLengkap,
-      Alamat: dataUser.Alamat,
-      Sekolah: dataUser.Sekolah,
+      user: dataUser,
       ProfilAkun: dataUser.ProfilAkun,
       TotalAkunUser: totalAkunUser,
       TotalAkunPetugas: totalAkunPetugas,

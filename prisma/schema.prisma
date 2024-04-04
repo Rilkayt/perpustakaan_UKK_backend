@@ -43,7 +43,7 @@ model kode_admin {
 }
 
 model buku {
-  BukuID               String                 @id
+  BukuID               String                 @id @default(cuid())
   Gambar               String
   Judul                String
   Penulis              String

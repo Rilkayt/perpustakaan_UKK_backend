@@ -35,6 +35,8 @@ router.post("/", async (req, res) => {
         let getKodeSchool = await prisma.kode_admin.findMany({
           where: { Sekolah: getUser[0].Sekolah },
         });
+        console.log(getKodeSchool);
+        console.log(getUser);
         if (getUser.length > 0) {
           let dataUser = {
             UserID: getUser[0].UserID,
@@ -46,6 +48,7 @@ router.post("/", async (req, res) => {
             Alamat: getUser[0].Alamat,
             Sekolah: getUser[0].Sekolah,
             Tipe: getUser[0].Tipe,
+            profilAkun: getUser[0].ProfilAkun,
             kodeSekolah: getKodeSchool[0].Kode,
           };
 
@@ -62,6 +65,7 @@ router.post("/", async (req, res) => {
             Alamat: getUser[0].Alamat,
             Sekolah: getUser[0].Sekolah,
             Tipe: getUser[0].Tipe,
+            profilAkun: getUser[0].ProfilAkun,
           };
 
           response(200, data, res, "Berhasil Login");
@@ -88,6 +92,7 @@ router.post("/", async (req, res) => {
             Alamat: getUser[0].Alamat,
             Sekolah: getUser[0].Sekolah,
             Tipe: getUser[0].Tipe,
+            profilAkun: getUser[0].ProfilAkun,
             kodeSekolah: getKodeSchool[0].Kode,
           };
 
@@ -104,6 +109,7 @@ router.post("/", async (req, res) => {
             Alamat: getUser[0].Alamat,
             Sekolah: getUser[0].Sekolah,
             Tipe: getUser[0].Tipe,
+            profilAkun: getUser[0].ProfilAkun,
           };
 
           response(200, data, res, "Berhasil Login");

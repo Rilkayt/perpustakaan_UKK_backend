@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const jwt = require("jsonwebtoken");
 const response = require("./resTemp");
+const path = require("path");
 
 app.use(cors());
 app.use(bodyParser.json());

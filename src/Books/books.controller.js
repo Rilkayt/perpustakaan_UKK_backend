@@ -8,7 +8,7 @@ const fs = require("fs");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./imageFile/booksCover/");
+    cb(null, "../perpustakaan_UKK_frontend/imageFile/booksCover/");
   },
   filename: function (req, file, cb) {
     cb(null, file.originalname);
@@ -59,38 +59,38 @@ router.post("/add-book-data", async (req, res) => {
   const data = req.body;
   const kodeSekolah = findCodeSchool(req.headers.authorization);
 
-  if (data.BukuID != "" && data.Judul != "") {
+  if (data.Judul != "") {
     if (data.Jumlah != 0) {
-      const bookIdFind = await prisma.buku.count({
-        where: {
-          BukuID: data.BukuID,
-        },
-      });
+      // const bookIdFind = await prisma.buku.count({
+      //   where: {
+      //     BukuID: data.BukuID,
+      //   },
+      // });
       // console.log(data.BukuID);
       // console.log(bookFind);
 
-      if (bookIdFind < 1) {
-        let dataBook = {
-          BukuID: data.BukuID,
-          Gambar: "",
-          Judul: data.Judul,
-          Penulis: data.Penulis,
-          Penerbit: data.Penerbit,
-          Sinopsis: data.Sinopsis,
-          TahunTerbit: data.TahunTerbit,
-          Jumlah: data.Jumlah,
-          kode_admin: kodeSekolah,
-        };
-        await prisma.buku
-          .create({
-            data: dataBook,
-          })
-          .then(() => {
-            response(200, dataBook, res, "buku berhasil terupload");
-          });
-      } else {
-        response(400, {}, res, "id buku sudah tersedia");
-      }
+      // if (bookIdFind < 1) {
+      let dataBook = {
+        BukuID: data.BukuID,
+        Gambar: "/imageFile/booksCover/default-cover.jpeg",
+        Judul: data.Judul,
+        Penulis: data.Penulis,
+        Penerbit: data.Penerbit,
+        Sinopsis: data.Sinopsis,
+        TahunTerbit: data.TahunTerbit,
+        Jumlah: data.Jumlah,
+        kode_admin: kodeSekolah,
+      };
+      await prisma.buku
+        .create({
+          data: dataBook,
+        })
+        .then(() => {
+          response(200, dataBook, res, "buku berhasil terupload");
+        });
+      // } else {
+      //   response(400, {}, res, "id buku sudah tersedia");
+      // }
     } else {
       response(400, {}, res, "jumlah buku harus lebih dari 0");
     }
@@ -109,7 +109,7 @@ router.put(
       console.log(req.file);
       await fs.rename(
         req.file.path,
-        `./imageFile/booksCover/${idBook}.jpg`,
+        `../perpustakaan_UKK_frontend/imageFile/booksCover/${idBook}.jpeg`,
         (err) => {
           console.log(req.file.path);
         }
@@ -121,7 +121,7 @@ router.put(
             BukuID: idBook,
           },
           data: {
-            Gambar: `./imageFile/booksCover/${idBook}.jpg`,
+            Gambar: `/imageFile/booksCover/${idBook}.jpeg`,
           },
         })
         .then(() => {

@@ -69,7 +69,7 @@ router.post("/", async (req, res) => {
                 Alamat: inputRegister.alamat,
                 Sekolah: inputRegister.sekolah,
                 Tipe: inputRegister.tipe,
-                ProfilAkun: "./imageFile/avatarProfile/default-profile.jpg",
+                ProfilAkun: "./imageFile/avatarProfile/default-profile.jpeg",
               },
             })
             .then(() => {
@@ -83,12 +83,7 @@ router.post("/", async (req, res) => {
           response(400, {}, res, "Email sudah tersedia");
         }
       } else {
-        throw response(
-          400,
-          {},
-          res,
-          "kode admin tidak ditemukan atau tidak valid"
-        );
+        response(400, {}, res, "kode admin tidak ditemukan atau tidak valid");
       }
     } else {
       response(400, {}, res, "otp tidak valid");
@@ -126,7 +121,7 @@ router.post("/", async (req, res) => {
               Alamat: inputRegister.alamat,
               Sekolah: inputRegister.sekolah,
               Tipe: inputRegister.tipe,
-              ProfilAkun: "./imageFile/avatarProfile/default-profile.jpg",
+              ProfilAkun: "./imageFile/avatarProfile/default-profile.jpeg",
             },
           })
           .then(() => {
@@ -246,14 +241,44 @@ router.post("/check-user", async (req, res) => {
     },
   });
 
-  if (checkUsername == 0 && checkEmail == 0 && checkNotelp == 0) {
-    response(200, {}, res, "data bisa di daftarkan");
-  } else if (checkUsername > 0) {
-    response(400, {}, res, "username sudah tersedia");
-  } else if (checkNotelp > 0) {
-    response(400, {}, res, "No telepon sudah tersedia");
-  } else if (checkEmail > 0) {
-    response(400, {}, res, "Email sudah tersedia");
+  let checkKodeAdmin = 0;
+  if (inputRegister.tipe === "ADMIN") {
+    await prisma.kode_admin
+      .count({
+        where: {
+          Kode: inputRegister.kode_admin,
+          Sekolah: inputRegister.sekolah,
+        },
+      })
+      .then((a) => {
+        console.log(a);
+        if (
+          checkUsername == 0 &&
+          checkEmail == 0 &&
+          checkNotelp == 0 &&
+          a == 1
+        ) {
+          response(200, {}, res, "data bisa di daftarkan");
+        } else if (checkUsername > 0) {
+          response(400, {}, res, "username sudah tersedia");
+        } else if (checkNotelp > 0) {
+          response(400, {}, res, "No telepon sudah tersedia");
+        } else if (checkEmail > 0) {
+          response(400, {}, res, "Email sudah tersedia");
+        } else if (checkKodeAdmin < 1) {
+          response(400, {}, res, "kode admin tidak sesuai");
+        }
+      });
+  } else {
+    if (checkUsername == 0 && checkEmail == 0 && checkNotelp == 0) {
+      response(200, {}, res, "data bisa di daftarkan");
+    } else if (checkUsername > 0) {
+      response(400, {}, res, "username sudah tersedia");
+    } else if (checkNotelp > 0) {
+      response(400, {}, res, "No telepon sudah tersedia");
+    } else if (checkEmail > 0) {
+      response(400, {}, res, "Email sudah tersedia");
+    }
   }
 });
 
