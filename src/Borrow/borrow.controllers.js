@@ -110,4 +110,15 @@ router.put("/change-status/:idPeminjaman/:kodeStatus", async (req, res) => {
   }
 });
 
+router.get("/riwayat", async (req, res) => {
+  let dataUser = findCodeSchool(req.headers.authorization);
+  console.log("🚀 ~ router.get ~ dataUser:", dataUser);
+
+  await prisma.peminjaman
+    .findMany({ where: { idUser: dataUser.UserID } })
+    .then((a) => {
+      console.log("🚀 ~ awaitprisma.peminjaman.findMany ~ a:", a);
+    });
+});
+
 module.exports = router;

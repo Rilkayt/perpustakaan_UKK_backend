@@ -34,6 +34,13 @@ router.get("/books", async (req, res) => {
           const dataBukuKategori = await prisma.kategori_buku_relasi.findMany({
             where: { idBuku: a[i].BukuID },
           });
+          const borrowIsBook = await prisma.peminjaman.count({
+            where: {
+              idBuku: a[i].BukuID,
+              status: 2,
+              kodeAdmin: a[i].kode_admin,
+            },
+          });
           if (dataBukuKategori.length > 0) {
             let data = [
               {
@@ -47,6 +54,7 @@ router.get("/books", async (req, res) => {
                 Jumlah: a[i].Jumlah,
                 kode_admin: a[i].kode_admin,
                 kategori: dataBukuKategori,
+                bukuSedangDipinjam: borrowIsBook,
               },
             ];
             dataBook = dataBook.concat(data);
@@ -63,13 +71,14 @@ router.get("/books", async (req, res) => {
                 Jumlah: a[i].Jumlah,
                 kode_admin: a[i].kode_admin,
                 kategori: [],
+                bukuSedangDipinjam: borrowIsBook,
               },
             ];
             dataBook = dataBook.concat(data);
           }
         }
 
-        response(
+        return response(
           200,
           { count: a.length, daftarBuku: dataBook },
           res,
@@ -127,6 +136,59 @@ router.get("/borrow", async (req, res) => {
           );
         });
     }
+  }
+});
+
+router.get("/borrow/:statusCode", async (req, res) => {
+  if (!req.headers.authorization) {
+    response(401, {}, res, "diperlukan auth");
+  } else {
+    const dataUser = findDataUser(req.headers.authorization);
+    let skipData = parseInt(req.query.skip);
+    let takeData = parseInt(req.query.take);
+
+    let dataReady = [];
+    await prisma.peminjaman
+      .findMany({
+        take: takeData,
+        skip: skipData,
+        where: {
+          kodeAdmin: dataUser.kodeSekolah,
+          status: parseInt(req.params.statusCode),
+        },
+      })
+      .then(async (a) => {
+        for (let i = 0; i < a.length; i++) {
+          let buku = await prisma.buku.findMany({
+            select: { Judul: true },
+            where: { BukuID: a[i].idBuku },
+          });
+
+          let user = await prisma.user.findFirst({
+            select: { Username: true, NoTelp: true },
+            where: { UserID: a[i].idUser },
+          });
+          let data = {
+            dataPinjam: a[i],
+            buku: buku,
+            user: {
+              Username: user.Username,
+              NoTelp: String(user.NoTelp),
+            },
+          };
+          console.log("🚀 ~ .then ~ data:", data);
+
+          dataReady.push(data);
+        }
+        response(
+          200,
+          { count: a.length, daftarPinjam: dataReady },
+          res,
+          a.length == 0
+            ? "belum ada yang melukan peminjaman"
+            : "berhasil mengambil data"
+        );
+      });
   }
 });
 

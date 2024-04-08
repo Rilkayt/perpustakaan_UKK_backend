@@ -64,7 +64,7 @@ const getDataController = require("./src/GetData/getData.controllers");
 
 app.use("/login", loginController);
 app.use("/register", registerController);
-app.use("/books", validateUserAdmin, booksController);
+app.use("/books", validateUser, booksController);
 app.use("/borrow", validateUser, borrowController);
 app.use("/category", validateUser, categoryController);
 app.use("/collection", validateUser, collectionController);
