@@ -414,4 +414,30 @@ router.get("/dashboard", async (req, res) => {
   }
 });
 
+router.get("/account", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+
+  await prisma.user
+    .findFirst({ where: { Email: dataUser.Email, UserID: dataUser.UserID } })
+    .then((a) => {
+      console.log(a);
+      response(
+        200,
+        {
+          UserID: a.UserID,
+          Username: a.Username,
+          NoTelp: String(a.NoTelp),
+          Email: a.Email,
+          NamaLengkap: a.NamaLengkap,
+          Alamat: a.Alamat,
+          Sekolah: a.Sekolah,
+          Tipe: a.Tipe,
+          ProfilAkun: a.ProfilAkun,
+        },
+        res,
+        "Berhasil Mendapat Data"
+      );
+    });
+});
+
 module.exports = router;

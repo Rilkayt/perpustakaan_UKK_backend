@@ -54,6 +54,7 @@ router.post("/:idBook", async (req, res) => {
       status: 1,
       jumlah: jumlah,
       kodeAdmin: dataUser.kodeSekolah,
+      dibuatPada: new Date(),
     };
     //   console.log(dataUser);
     await prisma.peminjaman
@@ -110,14 +111,34 @@ router.put("/change-status/:idPeminjaman/:kodeStatus", async (req, res) => {
   }
 });
 
-router.get("/riwayat", async (req, res) => {
+router.get("/user-list", async (req, res) => {
   let dataUser = findCodeSchool(req.headers.authorization);
   console.log("🚀 ~ router.get ~ dataUser:", dataUser);
 
+  const take = req.query.take;
+  const skip = req.query.skip;
+
+  let getData = [];
   await prisma.peminjaman
-    .findMany({ where: { idUser: dataUser.UserID } })
-    .then((a) => {
-      console.log("🚀 ~ awaitprisma.peminjaman.findMany ~ a:", a);
+    .findMany({
+      where: { idUser: dataUser.UserID },
+      orderBy: { dibuatPada: "desc" },
+      take: parseInt(take),
+      skip: parseInt(skip),
+    })
+    .then(async (a) => {
+      for (let i = 0; i < a.length; i++) {
+        let data = await prisma.buku.findFirst({
+          select: { Judul: true, Gambar: true },
+          where: { BukuID: a[i].idBuku },
+        });
+        let dataReady = {
+          dataPinjam: a[i],
+          dataBook: data,
+        };
+        getData.push(dataReady);
+      }
+      return response(200, getData, res, "Berhasil Mendapatkan Data");
     });
 });
 

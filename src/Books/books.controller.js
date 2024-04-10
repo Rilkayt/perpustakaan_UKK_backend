@@ -313,6 +313,7 @@ router.delete("/delete-book/:idBook", async (req, res) => {
 router.get("/:idBook", async (req, res) => {
   const idBook = req.params.idBook;
   const kode_admin = findCodeSchool(req.headers.authorization);
+  const dataUser = findDataUser(req.headers.authorization);
 
   const borrowIsBook = await prisma.peminjaman.count({
     where: {
@@ -343,6 +344,18 @@ router.get("/:idBook", async (req, res) => {
       }
     });
 
+  const findUlasanUserWithTheBook = await prisma.ulasan_buku.findFirst({
+    where: { idUser: dataUser.UserID, idBuku: idBook, kodeAdmin: kode_admin },
+  });
+
+  const findCollectionUserWithTheBook = await prisma.koleksi_pribadi.findFirst({
+    where: { idUser: dataUser.UserID, idBuku: idBook, kodeAdmin: kode_admin },
+  });
+
+  const findCountBorrowUserWithTheBook = await prisma.peminjaman.count({
+    where: { idBuku: idBook, status: 3, kodeAdmin: kode_admin },
+  });
+
   await prisma.buku.findMany({ where: { BukuID: idBook } }).then((a) => {
     return response(
       a.length < 1 ? 422 : 200,
@@ -351,6 +364,9 @@ router.get("/:idBook", async (req, res) => {
         sedangDipinjam: borrowIsBook,
         rating: ratingBook._avg.rating,
         ulasan: dataUserUlasan,
+        ulasanUser: findUlasanUserWithTheBook,
+        koleksiUser: findCollectionUserWithTheBook,
+        telahDiPinjamUser: findCountBorrowUserWithTheBook,
       },
       res,
       a.length < 1 ? "Data Tidak Tersedia" : "Berhasil Mendapat Data"
