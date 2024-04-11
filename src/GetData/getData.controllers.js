@@ -418,7 +418,7 @@ router.get("/account", async (req, res) => {
   const dataUser = findDataUser(req.headers.authorization);
 
   await prisma.user
-    .findFirst({ where: { Email: dataUser.Email, UserID: dataUser.UserID } })
+    .findFirst({ where: { UserID: dataUser.UserID } })
     .then((a) => {
       console.log(a);
       response(
