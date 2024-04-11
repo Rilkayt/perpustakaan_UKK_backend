@@ -72,7 +72,9 @@ model peminjaman {
   jumlah              Int
   Kode                kode_admin        @relation(fields: [kodeAdmin], references: [Kode])
   kodeAdmin           String
-  dibuatPada          DateTime          @default(dbgenerated("CONVERT_TZ(NOW(),'UTC','Asia/Jakarta')"))
+  dibuatPada          DateTime          @db.DateTime()
+  tanggalSudahKembali DateTime
+  terlambat           Int
 }
 
 model status_peminjaman {

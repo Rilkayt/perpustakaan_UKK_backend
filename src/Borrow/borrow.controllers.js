@@ -2,6 +2,7 @@ const express = require("express");
 const response = require("../../resTemp");
 const prisma = require("../../db");
 const jwt = require("jsonwebtoken");
+const moment = require("moment-timezone");
 
 const findCodeSchool = (tokenRequest) => {
   let token = tokenRequest;
@@ -32,6 +33,7 @@ router.post("/:idBook", async (req, res) => {
   const { tanggal_peminjaman, tanggal_pengembalian, jumlah } = req.body;
   let dataUser = findCodeSchool(req.headers.authorization);
 
+  console.log(moment(new Date()).tz("Asia/Jakarta").format("YYYY-MM-DD"));
   const stokBook = await prisma.buku.findMany({ where: { BukuID: idBook } });
   console.log(stokBook);
   if (stokBook[0].Jumlah > 0) {
@@ -45,21 +47,22 @@ router.post("/:idBook", async (req, res) => {
     const tglKembali = new Date(tanggal_pengembalian);
     // console.log({ tglPinjam });
 
-    const data = {
-      idPeminjaman: idPinjam,
-      idUser: dataUser.UserID,
-      idBuku: idBook,
-      tanggalPeminjaman: tglPinjam,
-      tanggalPengembalian: tglKembali,
-      status: 1,
-      jumlah: jumlah,
-      kodeAdmin: dataUser.kodeSekolah,
-      dibuatPada: new Date(),
-    };
     //   console.log(dataUser);
     await prisma.peminjaman
       .create({
-        data: data,
+        data: {
+          idPeminjaman: idPinjam,
+          idUser: dataUser.UserID,
+          idBuku: idBook,
+          tanggalPeminjaman: tglPinjam,
+          tanggalPengembalian: tglKembali,
+          status: 1,
+          jumlah: jumlah,
+          kodeAdmin: dataUser.kodeSekolah,
+          dibuatPada: new Date(moment(new Date()).tz("Asia/Jakarta")),
+          tanggalSudahKembali: null,
+          terlambat: 0,
+        },
       })
       .then((a) => {
         response(200, a, res, "berhasil melakukan peminjaman");
