@@ -2,6 +2,7 @@ const express = require("express");
 const response = require("../../resTemp");
 const prisma = require("../../db");
 const jwt = require("jsonwebtoken");
+const moment = require("moment-timezone");
 
 const findDataUser = (tokenRequest) => {
   let token = tokenRequest;
@@ -484,6 +485,364 @@ router.get("/employee", async (req, res) => {
         listData.push(data);
       }
       return response(200, listData, res, "Berhasil Mendapatkan Data");
+    });
+});
+
+router.get("/search/buku/:valueSearch", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+
+  await prisma.buku
+    .findMany({
+      where: {
+        OR: [{ Judul: { contains: req.params.valueSearch } }],
+        kode_admin: dataUser.kodeSekolah,
+      },
+    })
+    .then(async (a) => {
+      console.log(a);
+      let dataBook = [];
+      for (let i = 0; i < a.length; i++) {
+        const dataBukuKategori = await prisma.kategori_buku_relasi.findMany({
+          where: { idBuku: a[i].BukuID },
+        });
+        const borrowIsBook = await prisma.peminjaman.count({
+          where: {
+            idBuku: a[i].BukuID,
+            status: 2,
+            kodeAdmin: a[i].kode_admin,
+          },
+        });
+        if (dataBukuKategori.length > 0) {
+          let data = [
+            {
+              BukuID: a[i].BukuID,
+              Gambar: a[i].Gambar,
+              Judul: a[i].Judul,
+              Penulis: a[i].Penulis,
+              Penerbit: a[i].Penerbit,
+              Sinopsis: a[i].Penerbit,
+              TahunTerbit: a[i].TahunTerbit,
+              Jumlah: a[i].Jumlah,
+              kode_admin: a[i].kode_admin,
+              kategori: dataBukuKategori,
+              bukuSedangDipinjam: borrowIsBook,
+            },
+          ];
+          dataBook = dataBook.concat(data);
+        } else {
+          let data = [
+            {
+              BukuID: a[i].BukuID,
+              Gambar: a[i].Gambar,
+              Judul: a[i].Judul,
+              Penulis: a[i].Penulis,
+              Penerbit: a[i].Penerbit,
+              Sinopsis: a[i].Penerbit,
+              TahunTerbit: a[i].TahunTerbit,
+              Jumlah: a[i].Jumlah,
+              kode_admin: a[i].kode_admin,
+              kategori: [],
+              bukuSedangDipinjam: borrowIsBook,
+            },
+          ];
+          dataBook = dataBook.concat(data);
+        }
+      }
+
+      return response(
+        200,
+        { count: a.length, daftarBuku: dataBook },
+        res,
+        a.length == 0
+          ? "buku sudah tidak tersedia / sudah max"
+          : "berhasil mengambil data"
+      );
+    });
+});
+
+router.get("/search/peminjaman/:kode", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+
+  let kode = parseInt(req.params.kode);
+
+  if (kode === 1) {
+    await prisma.peminjaman
+      .findMany({
+        where: {
+          status: kode,
+          kodeAdmin: dataUser.kodeSekolah,
+          OR: [
+            {
+              BukuID: { OR: [{ Judul: { contains: req.query.search } }] },
+            },
+            { UserID: { OR: [{ Username: { contains: req.query.search } }] } },
+          ],
+        },
+      })
+      .then(async (a) => {
+        let dataReady = [];
+        for (let i = 0; i < a.length; i++) {
+          let buku = await prisma.buku.findMany({
+            select: { Judul: true },
+            where: { BukuID: a[i].idBuku },
+          });
+
+          let user = await prisma.user.findFirst({
+            select: { Username: true, NoTelp: true },
+            where: { UserID: a[i].idUser },
+          });
+          let data = {
+            dataPinjam: a[i],
+            buku: buku,
+            user: {
+              Username: user.Username,
+              NoTelp: String(user.NoTelp),
+            },
+          };
+          console.log("🚀 ~ .then ~ data:", data);
+
+          dataReady.push(data);
+        }
+        response(
+          200,
+          { count: a.length, daftarPinjam: dataReady },
+          res,
+          a.length == 0
+            ? "belum ada yang melukan peminjaman"
+            : "berhasil mengambil data"
+        );
+      });
+  }
+
+  if (kode === 2) {
+    await prisma.peminjaman
+      .findMany({
+        where: {
+          status: kode,
+          kodeAdmin: dataUser.kodeSekolah,
+          OR: [
+            {
+              BukuID: { OR: [{ Judul: { contains: req.query.search } }] },
+            },
+            { UserID: { OR: [{ Username: { contains: req.query.search } }] } },
+          ],
+        },
+      })
+      .then(async (a) => {
+        let dataReady = [];
+        for (let i = 0; i < a.length; i++) {
+          let buku = await prisma.buku.findMany({
+            select: { Judul: true },
+            where: { BukuID: a[i].idBuku },
+          });
+
+          let user = await prisma.user.findFirst({
+            select: { Username: true, NoTelp: true },
+            where: { UserID: a[i].idUser },
+          });
+          let data = {
+            dataPinjam: a[i],
+            buku: buku,
+            user: {
+              Username: user.Username,
+              NoTelp: String(user.NoTelp),
+            },
+          };
+          console.log("🚀 ~ .then ~ data:", data);
+
+          dataReady.push(data);
+        }
+        response(
+          200,
+          { count: a.length, daftarPinjam: dataReady },
+          res,
+          a.length == 0
+            ? "belum ada yang melukan peminjaman"
+            : "berhasil mengambil data"
+        );
+      });
+  }
+
+  if (kode === 3) {
+    await prisma.peminjaman
+      .findMany({
+        where: {
+          status: kode,
+          kodeAdmin: dataUser.kodeSekolah,
+          OR: [
+            {
+              BukuID: { OR: [{ Judul: { contains: req.query.search } }] },
+            },
+            { UserID: { OR: [{ Username: { contains: req.query.search } }] } },
+          ],
+        },
+      })
+      .then(async (a) => {
+        let dataReady = [];
+        for (let i = 0; i < a.length; i++) {
+          let buku = await prisma.buku.findMany({
+            select: { Judul: true },
+            where: { BukuID: a[i].idBuku },
+          });
+
+          let user = await prisma.user.findFirst({
+            select: { Username: true, NoTelp: true },
+            where: { UserID: a[i].idUser },
+          });
+          let data = {
+            dataPinjam: a[i],
+            buku: buku,
+            user: {
+              Username: user.Username,
+              NoTelp: String(user.NoTelp),
+            },
+          };
+          console.log("🚀 ~ .then ~ data:", data);
+
+          dataReady.push(data);
+        }
+        response(
+          200,
+          { count: a.length, daftarPinjam: dataReady },
+          res,
+          a.length == 0
+            ? "belum ada yang melukan peminjaman"
+            : "berhasil mengambil data"
+        );
+      });
+  }
+});
+
+router.get("/search/kategori/:valueSearch", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+
+  await prisma.kategori_buku
+    .findMany({
+      where: {
+        OR: [{ nama: { contains: req.params.valueSearch } }],
+        kodeAdmin: dataUser.kodeSekolah,
+      },
+    })
+    .then((a) => {
+      response(200, a, res, "Berhasil Mendaptkan search");
+    });
+});
+
+router.get("/filter/peminjaman-user/:kode", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+
+  let dataReady = [];
+  await prisma.peminjaman
+    .findMany({
+      where: {
+        status: parseInt(req.params.kode),
+        kodeAdmin: dataUser.kodeSekolah,
+        idUser: dataUser.UserID,
+      },
+    })
+    .then(async (a) => {
+      for (let i = 0; i < a.length; i++) {
+        let buku = await prisma.buku.findFirst({
+          select: { Judul: true, Gambar: true },
+          where: { BukuID: a[i].idBuku },
+        });
+
+        let user = await prisma.user.findFirst({
+          select: { Username: true, NoTelp: true },
+          where: { UserID: a[i].idUser },
+        });
+        let data = {
+          dataPinjam: a[i],
+          dataBook: buku,
+        };
+        console.log("🚀 ~ .then ~ data:", data);
+
+        dataReady.push(data);
+      }
+      response(
+        200,
+        dataReady,
+        res,
+        a.length == 0
+          ? "belum ada yang melukan peminjaman"
+          : "berhasil mengambil data"
+      );
+    });
+});
+
+router.get("/filter/buku/:idCategory", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+
+  await prisma.kategori_buku_relasi
+    .findMany({
+      select: {
+        idKategori: true,
+        BukuID: true,
+      },
+      where: {
+        idKategoriID: req.params.idCategory,
+        kodeAdmin: dataUser.kodeSekolah,
+      },
+    })
+    .then(async (a) => {
+      console.log(a);
+      let dataBook = [];
+      for (let i = 0; i < a.length; i++) {
+        const dataBukuKategori = await prisma.kategori_buku_relasi.findMany({
+          where: { idBuku: a[i].BukuID.BukuID },
+        });
+        const borrowIsBook = await prisma.peminjaman.count({
+          where: {
+            idBuku: a[i].BukuID.BukuID,
+            status: 2,
+            kodeAdmin: a[i].kode_admin,
+          },
+        });
+        if (dataBukuKategori.length > 0) {
+          let data = [
+            {
+              BukuID: a[i].BukuID.BukuID,
+              Gambar: a[i].BukuID.Gambar,
+              Judul: a[i].BukuID.Judul,
+              Penulis: a[i].BukuID.Penulis,
+              Penerbit: a[i].BukuID.Penerbit,
+              Sinopsis: a[i].BukuID.Penerbit,
+              TahunTerbit: a[i].BukuID.TahunTerbit,
+              Jumlah: a[i].BukuID.Jumlah,
+              kode_admin: a[i].BukuID.kode_admin,
+              kategori: dataBukuKategori,
+              bukuSedangDipinjam: borrowIsBook,
+            },
+          ];
+          dataBook = dataBook.concat(data);
+        } else {
+          let data = [
+            {
+              BukuID: a[i].BukuID,
+              Gambar: a[i].Gambar,
+              Judul: a[i].Judul,
+              Penulis: a[i].Penulis,
+              Penerbit: a[i].Penerbit,
+              Sinopsis: a[i].Penerbit,
+              TahunTerbit: a[i].TahunTerbit,
+              Jumlah: a[i].Jumlah,
+              kode_admin: a[i].kode_admin,
+              kategori: [],
+              bukuSedangDipinjam: borrowIsBook,
+            },
+          ];
+          dataBook = dataBook.concat(data);
+        }
+      }
+
+      return response(
+        200,
+        { count: a.length, daftarBuku: dataBook },
+        res,
+        a.length == 0
+          ? "buku sudah tidak tersedia / sudah max"
+          : "berhasil mengambil data"
+      );
     });
 });
 
