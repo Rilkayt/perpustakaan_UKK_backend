@@ -72,7 +72,7 @@ model peminjaman {
   jumlah              Int
   Kode                kode_admin        @relation(fields: [kodeAdmin], references: [Kode])
   kodeAdmin           String
-  dibuatPada          DateTime          @db.DateTime()
+  dibuatPada          DateTime
   tanggalSudahKembali DateTime
   terlambat           Int
 }
