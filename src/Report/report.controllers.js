@@ -465,7 +465,7 @@ const generateCsv4 = async (dataUserDetail, dateStart, dateEnd) => {
   await csvPath.writeRecords(dataReady);
 };
 
-const generateZip = async () => {
+const generateZip = async (res) => {
   const fileBody = fs.createWriteStream("./csvExport/file.zip");
   const archive = archiver("zip", { zlib: { level: 9 } });
 
@@ -474,6 +474,7 @@ const generateZip = async () => {
   });
 
   archive.pipe(fileBody);
+  archive.pipe(res);
 
   archive.file("./csvExport/dataTotalUser.csv", { name: "dataTotalUser.csv" });
   archive.file("./csvExport/dataBukuPinjam.csv", {
@@ -494,14 +495,36 @@ router.get("/download-csv/:dateStart/:dateEnd", async (req, res) => {
   await generateCsv3(dataUserDetail, req.params.dateStart, req.params.dateEnd);
   await generateCsv4(dataUserDetail, req.params.dateStart, req.params.dateEnd);
 
-  await generateZip();
+  const fileBody = fs.createWriteStream("./csvExport/file.zip");
+  const archive = archiver("zip", { zlib: { level: 9 } });
 
-  const fileCsv = "./csvExport/file.zip";
-  try {
-    response(200, fileCsv, res, "file didapat");
-  } catch (err) {
-    console.log("🚀 ~ router.get ~ err:", err);
-  }
+  fileBody.on("close", () => {
+    console.log(archive.pointer() + " byte");
+  });
+
+  archive.file("./csvExport/dataTotalUser.csv", { name: "dataTotalUser.csv" });
+  archive.file("./csvExport/dataBukuPinjam.csv", {
+    name: "dataBukuPinjam.csv",
+  });
+  archive.file("./csvExport/dataTerlambat.csv", { name: "dataTerlambat.csv" });
+  archive.file("./csvExport/dataBelumKembali.csv", {
+    name: "dataBelumKembali.csv",
+  });
+
+  res.setHeader("Content-Disposition", `attachment; filename="file.zip"`);
+  res.setHeader("Content-Type", "application/zip");
+
+  archive.pipe(fileBody);
+  archive.pipe(res);
+
+  archive.finalize();
+
+  // const fileCsv = "/csvExport/file.zip";
+  // try {
+  //   response(200, fileCsv, res, "file didapat");
+  // } catch (err) {
+  //   console.log("🚀 ~ router.get ~ err:", err);
+  // }
 });
 
 module.exports = router;
