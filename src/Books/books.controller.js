@@ -275,7 +275,7 @@ router.delete("/delete-book/:idBook", async (req, res) => {
       await prisma.$queryRaw`SELECT Gambar FROM buku where BukuID=${idBook};`;
 
     console.log(fileImage[0].Gambar);
-    if (fileImage[0].Gambar !== "/imageFile/booksCover/default-cover.jpeg") {
+    if (fileImage[0].Gambar != "/imageFile/booksCover/default-cover.jpeg") {
       await fs.unlink(
         "../perpustakaan_UKK_frontend" + fileImage[0].Gambar,
         (err) => {
@@ -291,19 +291,18 @@ router.delete("/delete-book/:idBook", async (req, res) => {
       });
     }
 
+    await prisma.ulasan_buku.deleteMany({ where: { idBuku: idBook } });
+    await prisma.peminjaman.deleteMany({ where: { idBuku: idBook } });
+    await prisma.kategori_buku_relasi.deleteMany({ where: { idBuku: idBook } });
+    await prisma.koleksi_pribadi.deleteMany({ where: { idBuku: idBook } });
     await prisma.buku
       .delete({
         where: {
           BukuID: idBook,
         },
       })
-      .then(() => {
-        response(
-          200,
-          {},
-          res,
-          `data buku dengan id ${idBook} berhasil dihapus`
-        );
+      .then((a) => {
+        return response(200, {}, res, "berhasil Menghapus Buku");
       });
   } else {
     response(400, {}, res, `buku dengan id ${idBook} tidak ditemukan`);

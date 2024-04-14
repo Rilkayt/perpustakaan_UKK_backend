@@ -62,6 +62,7 @@ const collectionController = require("./src/collection/collection.controllers");
 const ulasanController = require("./src/Ulasan/ulasan.controllers");
 const getDataController = require("./src/GetData/getData.controllers");
 const accountController = require("./src/Account/account.controllers");
+const reportController = require("./src/Report/report.controllers");
 
 app.use("/login", loginController);
 app.use("/register", registerController);
@@ -72,6 +73,7 @@ app.use("/collection", validateUser, collectionController);
 app.use("/ulasan", validateUser, ulasanController);
 app.use("/get-data", validateUser, getDataController);
 app.use("/account", validateUser, accountController);
+app.use("/report", validateUserAdmin, reportController);
 
 app.listen(3000, () => {
   console.log("run in port 3000");

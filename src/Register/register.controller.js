@@ -69,7 +69,7 @@ router.post("/", async (req, res) => {
                 Alamat: inputRegister.alamat,
                 Sekolah: inputRegister.sekolah,
                 Tipe: inputRegister.tipe,
-                ProfilAkun: "./imageFile/avatarProfile/default-profile.jpeg",
+                ProfilAkun: "/imageFile/avatarProfile/default-profile.jpeg",
               },
             })
             .then(() => {
@@ -121,7 +121,7 @@ router.post("/", async (req, res) => {
               Alamat: inputRegister.alamat,
               Sekolah: inputRegister.sekolah,
               Tipe: inputRegister.tipe,
-              ProfilAkun: "./imageFile/avatarProfile/default-profile.jpeg",
+              ProfilAkun: "/imageFile/avatarProfile/default-profile.jpeg",
             },
           })
           .then(() => {
@@ -176,37 +176,24 @@ router.post("/add-employee", async (req, res) => {
   const inputRegister = req.body;
   const dataUser = await findDataUser(req.headers.authorization);
 
-  let checkUsername = await prisma.user.count({
-    where: {
-      Username: inputRegister.username,
-    },
-  });
-
   let checkEmail = await prisma.user.count({
     where: {
       Email: inputRegister.email,
     },
   });
 
-  let checkNotelp = await prisma.user.count({
-    where: {
-      NoTelp: inputRegister.notelp,
-    },
-  });
-
-  if (checkUsername == 0 && checkEmail == 0 && checkNotelp == 0) {
+  if (checkEmail == 0) {
     await prisma.user
       .create({
         data: {
-          Username: inputRegister.username,
           Password: inputRegister.password,
-          NoTelp: inputRegister.notelp,
+          NoTelp: 0,
           Email: inputRegister.email,
           NamaLengkap: inputRegister.namaLengkap,
-          Alamat: inputRegister.alamat,
+          Alamat: "",
           Sekolah: dataUser.Sekolah,
           Tipe: "EMPLOYEE",
-          ProfilAkun: "./imageFile/avatarProfile/default-profile.jpg",
+          ProfilAkun: "/imageFile/avatarProfile/default-profile.jpg",
         },
       })
       .then(() => {

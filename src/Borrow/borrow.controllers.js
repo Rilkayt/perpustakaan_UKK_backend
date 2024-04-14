@@ -48,25 +48,29 @@ router.post("/:idBook", async (req, res) => {
     // console.log({ tglPinjam });
 
     //   console.log(dataUser);
-    await prisma.peminjaman
-      .create({
-        data: {
-          idPeminjaman: idPinjam,
-          idUser: dataUser.UserID,
-          idBuku: idBook,
-          tanggalPeminjaman: tglPinjam,
-          tanggalPengembalian: tglKembali,
-          status: 1,
-          jumlah: jumlah,
-          kodeAdmin: dataUser.kodeSekolah,
-          dibuatPada: new Date(moment(new Date()).tz("Asia/Jakarta")),
-          tanggalSudahKembali: null,
-          terlambat: 0,
-        },
-      })
-      .then((a) => {
-        response(200, a, res, "berhasil melakukan peminjaman");
-      });
+    try {
+      await prisma.peminjaman
+        .create({
+          data: {
+            idPeminjaman: idPinjam,
+            idUser: dataUser.UserID,
+            idBuku: idBook,
+            tanggalPeminjaman: tglPinjam,
+            tanggalPengembalian: tglKembali,
+            status: 1,
+            jumlah: jumlah,
+            kodeAdmin: dataUser.kodeSekolah,
+            dibuatPada: new Date(moment(new Date()).tz("Asia/Jakarta")),
+            telahKembali: "",
+            terlambat: 0,
+          },
+        })
+        .then((a) => {
+          response(200, a, res, "berhasil melakukan peminjaman");
+        });
+    } catch (error) {
+      console.log(error);
+    }
   } else {
     response(500, {}, res, "stok buku sedang habis");
   }
@@ -107,6 +111,30 @@ router.put("/change-status/:idPeminjaman/:kodeStatus", async (req, res) => {
             where: { BukuID: dataPinjamBuku[0].idBuku },
             data: { Jumlah: jumlahBukuSekarang },
           });
+          await prisma.peminjaman
+            .update({
+              where: { idPeminjaman: idPinjam },
+              data: {
+                telahKembali: moment(new Date())
+                  .tz("Asia/Jakarta")
+                  .format("YYYY-MM-DD"),
+              },
+            })
+            .then(async (a) => {
+              let dateRange =
+                new Date(a.telahKembali).getDay() -
+                new Date(a.tanggalPengembalian).getDay();
+              console.log(
+                "🚀 ~ awaitprisma.peminjaman.update ~ dateRange:",
+                dateRange
+              );
+              if (dateRange >= 1) {
+                await prisma.peminjaman.update({
+                  where: { idPeminjaman: idPinjam },
+                  data: { terlambat: dateRange },
+                });
+              }
+            });
         }
         console.log(dataPinjamBuku);
         response(200, a, res, "berhasil mengubah status");

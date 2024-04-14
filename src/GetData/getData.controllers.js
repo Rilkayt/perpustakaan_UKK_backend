@@ -293,11 +293,8 @@ router.get("/dashboard", async (req, res) => {
       });
 
     // koleksi
-    await prisma.koleksi_pribadi
-      .findMany({
-        where: { idUser: dataUser.UserID, kodeAdmin: dataUser.kodeSekolah },
-      })
-      .then(async (a) => {
+    await prisma.$queryRaw`SELECT * FROM koleksi_pribadi WHERE kodeAdmin=${dataUser.kodeSekolah} && idUser=${dataUser.UserID}  ORDER BY RAND() LIMIT 3`.then(
+      async (a) => {
         // console.log(a.length);
         for (let i = 0; i < a.length; i++) {
           let data = await prisma.buku.findMany({
@@ -306,7 +303,8 @@ router.get("/dashboard", async (req, res) => {
 
           collection = collection.concat(data);
         }
-      });
+      }
+    );
 
     // buku
     await prisma.$queryRaw`SELECT * FROM buku WHERE kode_admin=${dataUser.kodeSekolah}  ORDER BY RAND() LIMIT 20`.then(
@@ -380,9 +378,9 @@ router.get("/dashboard", async (req, res) => {
       });
 
     // buku populer
-    await prisma.$queryRaw`SELECT idBuku,SUM(jumlah) AS totalPinjam FROM peminjaman GROUP BY idBuku ORDER BY totalPinjam DESC LIMIT 20;`.then(
+    await prisma.$queryRaw`SELECT idBuku,SUM(jumlah) AS totalPinjam FROM peminjaman WHERE status=2 OR status=3 GROUP BY idBuku ORDER BY totalPinjam DESC LIMIT 5;`.then(
       async (a) => {
-        // console.log(a);
+        console.log(a);
         for (let i = 0; i < a.length; i++) {
           await prisma.buku
             .findFirst({
@@ -437,6 +435,55 @@ router.get("/account", async (req, res) => {
         res,
         "Berhasil Mendapat Data"
       );
+    });
+});
+
+router.get("/collections", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+  const take = parseInt(req.query.take);
+  const skip = parseInt(req.query.skip);
+
+  await prisma.koleksi_pribadi
+    .findMany({
+      where: { idUser: dataUser.UserID, kodeAdmin: dataUser.kodeSekolah },
+      take: take,
+      skip: skip,
+    })
+    .then(async (a) => {
+      let data = [];
+      for (let i = 0; i < a.length; i++) {
+        let dataBuku = await prisma.buku.findFirst({
+          where: { BukuID: a[i].idBuku, kode_admin: a[i].kodeAdmin },
+        });
+        data.push(dataBuku);
+      }
+      return response(200, data, res, "Berhasil Mengambil Koleksi");
+    });
+});
+
+router.get("/employee", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+
+  await prisma.user
+    .findMany({ where: { Sekolah: dataUser.Sekolah, Tipe: "EMPLOYEE" } })
+    .then((a) => {
+      let listData = [];
+      for (let i = 0; i < a.length; i++) {
+        let data = {
+          UserID: a[i].UserID,
+          Username: a[i].Username,
+          Password: a[i].Password,
+          NoTelp: String(a[i].NoTelp),
+          Email: a[i].Email,
+          NamaLengkap: a[i].NamaLengkap,
+          Alamat: a[i].Alamat,
+          Sekolah: a[i].Sekolah,
+          Tipe: a[i].Tipe,
+          ProfilAkun: a[i].ProfilAkun,
+        };
+        listData.push(data);
+      }
+      return response(200, listData, res, "Berhasil Mendapatkan Data");
     });
 });
 

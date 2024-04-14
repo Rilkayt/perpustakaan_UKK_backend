@@ -262,4 +262,25 @@ router.put("/update-password/:pass", async (req, res) => {
     });
 });
 
+router.put("/update-employee", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+  const dataBody = req.body;
+
+  await prisma.user
+    .update({
+      where: { Sekolah: dataUser.Sekolah, UserID: dataBody.idUser },
+      data: {
+        NamaLengkap: dataBody.namaLengkap,
+        Email: dataBody.email,
+        Password: dataBody.password,
+      },
+    })
+    .then((a) => {
+      return response(200, {}, res, "berhasil memperbarui user employee");
+    })
+    .catch((err) => {
+      return response(400, err, res, "terdapat kesalahan");
+    });
+});
+
 module.exports = router;

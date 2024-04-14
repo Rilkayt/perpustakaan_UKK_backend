@@ -17,7 +17,7 @@ datasource db {
 
 model user {
   UserID          String            @id @default(uuid())
-  Username        String            @unique
+  Username        String            @unique @default(uuid())
   Password        String
   NoTelp          BigInt
   Email           String            @unique
@@ -26,9 +26,9 @@ model user {
   Sekolah         String
   Tipe            String
   ProfilAkun      String
-  peminjaman      peminjaman[]
   koleksi_pribadi koleksi_pribadi[]
   ulasan_buku     ulasan_buku[]
+  peminjaman      peminjaman[]
 }
 
 model kode_admin {
@@ -53,29 +53,31 @@ model buku {
   Jumlah               Int                    @default(0)
   Kode                 kode_admin             @relation(fields: [kode_admin], references: [Kode])
   kode_admin           String
-  peminjaman           peminjaman[]
   kategori_buku_relasi kategori_buku_relasi[]
   koleksi_pribadi      koleksi_pribadi[]
   ulasan_buku          ulasan_buku[]
+  peminjaman           peminjaman[]
 }
 
 model peminjaman {
   idPeminjaman        String            @id @default(uuid())
+  tanggalPeminjaman   DateTime          @db.Date
+  tanggalPengembalian DateTime          @db.Date
+  jumlah              Int
+  dibuatPada          DateTime
   UserID              user              @relation(fields: [idUser], references: [UserID])
   idUser              String
   BukuID              buku              @relation(fields: [idBuku], references: [BukuID])
   idBuku              String
-  tanggalPeminjaman   DateTime          @db.Date
-  tanggalPengembalian DateTime          @db.Date
-  id                  status_peminjaman @relation(fields: [status], references: [id])
-  status              Int
-  jumlah              Int
   Kode                kode_admin        @relation(fields: [kodeAdmin], references: [Kode])
   kodeAdmin           String
-  dibuatPada          DateTime
-  tanggalSudahKembali DateTime
+  id                  status_peminjaman @relation(fields: [status], references: [id])
+  status              Int
+  telahKembali        String
   terlambat           Int
 }
+
+// bugs di prisma kalo misal saat create terus ada error di relasi nya , padahal sudah benar, coba tulis ulang kembali, misal error di peminjaman , cari yang peminjman[] ini hapus dulu terus tulis lagi relasi ny, 
 
 model status_peminjaman {
   id         Int          @id
