@@ -373,6 +373,75 @@ router.get("/:idBook", async (req, res) => {
   });
 });
 
+router.get("/:idBook/:idUser", async (req, res) => {
+  const idBook = req.params.idBook;
+  const kode_admin = findCodeSchool(req.headers.authorization);
+  const dataUser = findDataUser(req.headers.authorization);
+
+  const borrowIsBook = await prisma.peminjaman.count({
+    where: {
+      idBuku: idBook,
+      status: 2,
+      kodeAdmin: kode_admin,
+    },
+  });
+
+  const ratingBook = await prisma.ulasan_buku.aggregate({
+    where: { idBuku: idBook },
+    _avg: { rating: true },
+  });
+
+  let dataUserUlasan = [];
+  const ulasanBook = await prisma.ulasan_buku
+    .findMany({
+      where: { idBuku: idBook },
+    })
+    .then(async (a) => {
+      for (let i = 0; i < a.length; i++) {
+        let user = await prisma.user.findFirst({
+          select: { ProfilAkun: true, Username: true },
+          where: { UserID: a[i].idUser },
+        });
+        let data = [{ ulasan: a[i], userUlasan: user }];
+        dataUserUlasan = dataUserUlasan.concat(data);
+      }
+    });
+
+  const findUlasanUserWithTheBook = await prisma.ulasan_buku.findFirst({
+    where: { idUser: dataUser.UserID, idBuku: idBook, kodeAdmin: kode_admin },
+  });
+
+  const findCollectionUserWithTheBook = await prisma.koleksi_pribadi.findFirst({
+    where: { idUser: dataUser.UserID, idBuku: idBook, kodeAdmin: kode_admin },
+  });
+
+  const findCountBorrowUserWithTheBook = await prisma.peminjaman.count({
+    where: {
+      idBuku: idBook,
+      status: 3,
+      idUser: req.params.idUser,
+      kodeAdmin: kode_admin,
+    },
+  });
+
+  await prisma.buku.findMany({ where: { BukuID: idBook } }).then((a) => {
+    return response(
+      a.length < 1 ? 422 : 200,
+      {
+        buku: a,
+        sedangDipinjam: borrowIsBook,
+        rating: ratingBook._avg.rating,
+        ulasan: dataUserUlasan,
+        ulasanUser: findUlasanUserWithTheBook,
+        koleksiUser: findCollectionUserWithTheBook,
+        telahDiPinjamUser: findCountBorrowUserWithTheBook,
+      },
+      res,
+      a.length < 1 ? "Data Tidak Tersedia" : "Berhasil Mendapat Data"
+    );
+  });
+});
+
 router.use((err, req, res, next) => {
   if (err.code == "LIMIT_FILE_SIZE") {
     response(400, {}, res, "ukuran file gambar terlalu besar");

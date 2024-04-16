@@ -3,6 +3,7 @@ const response = require("../../resTemp");
 const prisma = require("../../db");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 
 const router = express.Router();
 
@@ -27,8 +28,12 @@ router.post("/", async (req, res) => {
 
   if (inputUser != "" && inputPw != "") {
     if (inputUser.includes("@")) {
+      let passwordCryptoUserInput = crypto
+        .createHash("sha256")
+        .update(inputPw)
+        .digest("hex");
       let getUser =
-        await prisma.$queryRaw`SELECT * FROM User WHERE Email=${inputUser} && Password=${inputPw}`;
+        await prisma.$queryRaw`SELECT * FROM User WHERE Email=${inputUser} && Password=${passwordCryptoUserInput}`;
       if (getUser.length === 0) {
         response(400, {}, res, "user tidak ditemukan");
       } else {
@@ -74,8 +79,12 @@ router.post("/", async (req, res) => {
         }
       }
     } else {
+      let passwordCryptoUserInput = crypto
+        .createHash("sha256")
+        .update(inputPw)
+        .digest("hex");
       let getUser =
-        await prisma.$queryRaw`SELECT * FROM User WHERE Username=${inputUser} && Password=${inputPw}`;
+        await prisma.$queryRaw`SELECT * FROM User WHERE Username=${inputUser} && Password=${passwordCryptoUserInput}`;
       if (getUser.length > 0) {
         let getKodeSchool = await prisma.kode_admin.findMany({
           where: { Sekolah: getUser[0].Sekolah },

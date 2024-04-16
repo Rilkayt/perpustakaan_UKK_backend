@@ -465,29 +465,6 @@ const generateCsv4 = async (dataUserDetail, dateStart, dateEnd) => {
   await csvPath.writeRecords(dataReady);
 };
 
-const generateZip = async (res) => {
-  const fileBody = fs.createWriteStream("./csvExport/file.zip");
-  const archive = archiver("zip", { zlib: { level: 9 } });
-
-  fileBody.on("close", () => {
-    console.log(archive.pointer() + " byte");
-  });
-
-  archive.pipe(fileBody);
-  archive.pipe(res);
-
-  archive.file("./csvExport/dataTotalUser.csv", { name: "dataTotalUser.csv" });
-  archive.file("./csvExport/dataBukuPinjam.csv", {
-    name: "dataBukuPinjam.csv",
-  });
-  archive.file("./csvExport/dataTerlambat.csv", { name: "dataTerlambat.csv" });
-  archive.file("./csvExport/dataBelumKembali.csv", {
-    name: "dataBelumKembali.csv",
-  });
-
-  archive.finalize();
-};
-
 router.get("/download-csv/:dateStart/:dateEnd", async (req, res) => {
   let dataUserDetail = findDataUser(req.headers.authorization);
   await generateCsv1(dataUserDetail, req.params.dateStart, req.params.dateEnd);

@@ -67,6 +67,9 @@ router.put("/update-image", upload.single("file"), async (req, res) => {
     const dataUser = findDataUser(req.headers.authorization);
 
     console.log(req.file);
+    if (req.file == undefined)
+      return response(400, {}, res, "wajib mengunggah gambar");
+
     await fs.rename(
       req.file.path,
       `../perpustakaan_UKK_frontend/imageFile/avatarProfile/${dataUser.UserID}.jpeg`,
@@ -222,7 +225,7 @@ router.get("/check-otp-password/:otp", async (req, res) => {
   if (parseInt(otpUser) == otpData.otp) {
     return response(200, {}, res, "otp benar");
   } else {
-    return 400, {}, res, "otp salah";
+    return response(400, {}, res, "otp salah");
   }
 });
 
@@ -283,4 +286,9 @@ router.put("/update-employee", async (req, res) => {
     });
 });
 
+router.use((err, req, res, next) => {
+  if (err.code == "LIMIT_FILE_SIZE") {
+    response(400, {}, res, "ukuran file gambar terlalu besar");
+  }
+});
 module.exports = router;

@@ -3,6 +3,7 @@ const response = require("../../resTemp");
 const prisma = require("../../db");
 const nodemailer = require("nodemailer");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 
 const findDataUser = (tokenRequest) => {
   let token = tokenRequest;
@@ -62,7 +63,10 @@ router.post("/", async (req, res) => {
             .create({
               data: {
                 Username: inputRegister.username,
-                Password: inputRegister.password,
+                Password: crypto
+                  .createHash("sha256")
+                  .update(inputRegister.password)
+                  .digest("hex"),
                 NoTelp: inputRegister.notelp,
                 Email: inputRegister.email,
                 NamaLengkap: inputRegister.namaLengkap,
@@ -114,7 +118,10 @@ router.post("/", async (req, res) => {
           .create({
             data: {
               Username: inputRegister.username,
-              Password: inputRegister.password,
+              Password: crypto
+                .createHash("sha256")
+                .update(inputRegister.password)
+                .digest("hex"),
               NoTelp: inputRegister.notelp,
               Email: inputRegister.email,
               NamaLengkap: inputRegister.namaLengkap,
