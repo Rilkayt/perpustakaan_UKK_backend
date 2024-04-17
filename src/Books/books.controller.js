@@ -158,7 +158,7 @@ router.post("/add-book-data/csv", uploadCSV.single("file"), (req, res) => {
     .on("data", (data) => {
       console.log("🚀 ~ .on ~ data:", data);
       let dataSplit =
-        data["Judul;Jumlah;Penulis;Penerbit;Tahun Terbit;;"].split(";");
+        data["Judul;Jumlah;Penulis;Penerbit;Tahun Terbit"].split(";");
       console.log(parseInt(dataSplit[4]));
       console.log(parseInt(dataSplit[1]));
       let readyData = {

@@ -3,6 +3,7 @@ const response = require("../../resTemp");
 const prisma = require("../../db");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 
 const multer = require("multer");
 const fs = require("fs");
@@ -275,7 +276,10 @@ router.put("/update-employee", async (req, res) => {
       data: {
         NamaLengkap: dataBody.namaLengkap,
         Email: dataBody.email,
-        Password: dataBody.password,
+        Password: crypto
+          .createHash("sha256")
+          .update(dataBody.password)
+          .digest("hex"),
       },
     })
     .then((a) => {
@@ -283,6 +287,21 @@ router.put("/update-employee", async (req, res) => {
     })
     .catch((err) => {
       return response(400, err, res, "terdapat kesalahan");
+    });
+});
+
+router.delete("/delete-employee/:idEmployee", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+
+  await prisma.user
+    .delete({
+      where: { UserID: req.params.idEmployee, Sekolah: dataUser.Sekolah },
+    })
+    .then((a) => {
+      return response(200, {}, res, "berhasil menghapus data petugas");
+    })
+    .catch((err) => {
+      return response(500, {}, res, "Terjadi kesalahan sistem");
     });
 });
 

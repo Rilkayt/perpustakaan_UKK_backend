@@ -160,7 +160,12 @@ router.put("/change-password/:email", async (req, res) => {
   await prisma.user
     .update({
       where: { Email: email },
-      data: { Password: newPassword.password },
+      data: {
+        Password: crypto
+          .createHash("sha256")
+          .update(newPassword.password)
+          .digest("hex"),
+      },
     })
     .then((a) => {
       response(200, {}, res, "Berhasil mwngubah password");

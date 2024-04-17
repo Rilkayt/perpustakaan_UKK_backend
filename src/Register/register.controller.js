@@ -193,7 +193,11 @@ router.post("/add-employee", async (req, res) => {
     await prisma.user
       .create({
         data: {
-          Password: inputRegister.password,
+          Username: `PTGS${Math.floor(1000 + Math.random() * 9000)}`,
+          Password: crypto
+            .createHash("sha256")
+            .update(inputRegister.password)
+            .digest("hex"),
           NoTelp: 0,
           Email: inputRegister.email,
           NamaLengkap: inputRegister.namaLengkap,
