@@ -37,6 +37,18 @@ router.post("/", async (req, res) => {
     let checkCode =
       await prisma.$queryRaw`SELECT * FROM kode_admin WHERE Kode = ${inputRegister.kode_admin}`;
     // console.log(checkCode);
+
+    let checkAdminInSchool = await prisma.user.count({
+      where: { Tipe: "ADMIN", Sekolah: inputRegister.sekolah },
+    });
+    if (checkAdminInSchool > 0)
+      return response(
+        500,
+        {},
+        res,
+        "Sudah Ada Admin Yang Terdaftar Di Sekolah Ini"
+      );
+
     if (inputRegister.otp == otpData.otp && inputRegister.otp != "") {
       if (checkCode.length > 0) {
         let checkUsername = await prisma.user.count({
@@ -219,6 +231,46 @@ router.post("/add-employee", async (req, res) => {
   }
 });
 
+router.post("/add-moderator", async (req, res) => {
+  const inputRegister = req.body;
+  const dataUser = await findDataUser(req.headers.authorization);
+
+  let checkEmail = await prisma.user.count({
+    where: {
+      Email: inputRegister.email,
+    },
+  });
+
+  if (checkEmail == 0) {
+    await prisma.user
+      .create({
+        data: {
+          Username: `MDRTR${Math.floor(1000 + Math.random() * 9000)}`,
+          Password: crypto
+            .createHash("sha256")
+            .update(inputRegister.password)
+            .digest("hex"),
+          NoTelp: 0,
+          Email: inputRegister.email,
+          NamaLengkap: inputRegister.namaLengkap,
+          Alamat: "",
+          Sekolah: dataUser.Sekolah,
+          Tipe: "MODERATOR",
+          ProfilAkun: "/imageFile/avatarProfile/default-profile.jpg",
+        },
+      })
+      .then(() => {
+        response(200, inputRegister, res, "Register Berhasil !");
+      });
+  } else if (checkUsername > 0) {
+    response(400, {}, res, "username sudah tersedia");
+  } else if (checkNotelp > 0) {
+    response(400, {}, res, "No telepon sudah tersedia");
+  } else if (checkEmail > 0) {
+    response(400, {}, res, "Email sudah tersedia");
+  }
+});
+
 router.post("/check-user", async (req, res) => {
   const inputRegister = req.body;
   let checkUsername = await prisma.user.count({
@@ -248,8 +300,19 @@ router.post("/check-user", async (req, res) => {
           Sekolah: inputRegister.sekolah,
         },
       })
-      .then((a) => {
+      .then(async (a) => {
         console.log(a);
+        let checkAdminInSchool = await prisma.user.count({
+          where: { Tipe: "ADMIN", Sekolah: inputRegister.sekolah },
+        });
+        if (checkAdminInSchool > 0)
+          return response(
+            500,
+            {},
+            res,
+            "Sudah Ada Admin Yang Terdaftar Di Sekolah Ini"
+          );
+
         if (
           checkUsername == 0 &&
           checkEmail == 0 &&

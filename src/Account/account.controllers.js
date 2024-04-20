@@ -305,6 +305,45 @@ router.delete("/delete-employee/:idEmployee", async (req, res) => {
     });
 });
 
+router.put("/update-moderator", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+  const dataBody = req.body;
+
+  await prisma.user
+    .update({
+      where: { Sekolah: dataUser.Sekolah, UserID: dataBody.idUser },
+      data: {
+        NamaLengkap: dataBody.namaLengkap,
+        Email: dataBody.email,
+        Password: crypto
+          .createHash("sha256")
+          .update(dataBody.password)
+          .digest("hex"),
+      },
+    })
+    .then((a) => {
+      return response(200, {}, res, "berhasil memperbarui user moderator");
+    })
+    .catch((err) => {
+      return response(400, err, res, "terdapat kesalahan");
+    });
+});
+
+router.delete("/delete-moderator/:idModerator", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+
+  await prisma.user
+    .delete({
+      where: { UserID: req.params.idModerator, Sekolah: dataUser.Sekolah },
+    })
+    .then((a) => {
+      return response(200, {}, res, "berhasil menghapus data moderator");
+    })
+    .catch((err) => {
+      return response(500, {}, res, "Terjadi kesalahan sistem");
+    });
+});
+
 router.use((err, req, res, next) => {
   if (err.code == "LIMIT_FILE_SIZE") {
     response(400, {}, res, "ukuran file gambar terlalu besar");

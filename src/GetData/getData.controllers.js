@@ -488,6 +488,32 @@ router.get("/employee", async (req, res) => {
     });
 });
 
+router.get("/moderator", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+
+  await prisma.user
+    .findMany({ where: { Sekolah: dataUser.Sekolah, Tipe: "MODERATOR" } })
+    .then((a) => {
+      let listData = [];
+      for (let i = 0; i < a.length; i++) {
+        let data = {
+          UserID: a[i].UserID,
+          Username: a[i].Username,
+          Password: a[i].Password,
+          NoTelp: String(a[i].NoTelp),
+          Email: a[i].Email,
+          NamaLengkap: a[i].NamaLengkap,
+          Alamat: a[i].Alamat,
+          Sekolah: a[i].Sekolah,
+          Tipe: a[i].Tipe,
+          ProfilAkun: a[i].ProfilAkun,
+        };
+        listData.push(data);
+      }
+      return response(200, listData, res, "Berhasil Mendapatkan Data");
+    });
+});
+
 router.get("/search/buku/:valueSearch", async (req, res) => {
   const dataUser = findDataUser(req.headers.authorization);
 
@@ -725,6 +751,41 @@ router.get("/search/kategori/:valueSearch", async (req, res) => {
     })
     .then((a) => {
       response(200, a, res, "Berhasil Mendaptkan search");
+    });
+});
+
+router.get("/search/koleksi/:valueSearch", async (req, res) => {
+  const dataUser = findDataUser(req.headers.authorization);
+  await prisma.koleksi_pribadi
+    .findMany({
+      select: { BukuID: true },
+      where: {
+        OR: [
+          { BukuID: { OR: [{ Judul: { contains: req.params.valueSearch } }] } },
+        ],
+        idUser: dataUser.UserID,
+        kodeAdmin: dataUser.kodeSekolah,
+      },
+    })
+    .then((a) => {
+      console.log(a);
+      let data = [];
+      a.forEach((v) => {
+        let dataBook = {
+          BukuID: v.BukuID.BukuID,
+          Gambar: v.BukuID.Gambar,
+          Judul: v.BukuID.Judul,
+          Penulis: v.BukuID.Penulis,
+          Penerbit: v.BukuID.Penerbit,
+          Sinopsis: v.BukuID.Sinopsis,
+          TahunTerbit: v.BukuID.TahunTerbit,
+          Jumlah: v.BukuID.Jumlah,
+          kode_admin: v.BukuID.kode_admin,
+        };
+        data.push(dataBook);
+      });
+
+      response(200, data, res, "Berhasil Mendaptkan search");
     });
 });
 

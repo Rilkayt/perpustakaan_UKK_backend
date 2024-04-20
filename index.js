@@ -22,7 +22,11 @@ const validateUserAdmin = (req, res, next) => {
     if (err) {
       response(401, {}, res, "token tidak valid");
     } else {
-      if (decode.Tipe != "ADMIN" && decode.Tipe != "EMPLOYEE") {
+      if (
+        decode.Tipe != "ADMIN" &&
+        decode.Tipe != "MODERATOR" &&
+        decode.Tipe != "EMPLOYEE"
+      ) {
         response(400, {}, res, "USER tidak diperkenankan");
       } else {
         next();

@@ -245,7 +245,7 @@ router.put("/update-book/:idBook", async (req, res) => {
     Penulis: dataUpdate.Penulis,
     Penerbit: dataUpdate.Penerbit,
     Sinopsis: dataUpdate.Sinopsis,
-    TahunTerbit: dataUpdate.TahunTerbit,
+    TahunTerbit: parseInt(dataUpdate.TahunTerbit),
     Jumlah: dataUpdate.Jumlah,
     kode_admin: kodeSekolah,
   };
