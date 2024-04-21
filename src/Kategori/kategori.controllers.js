@@ -172,6 +172,38 @@ router.get("/:idCategory", async (req, res) => {
     });
 });
 
+router.get("/:idCategory/:valueSearch", async (req, res) => {
+  const idCategory = req.params.idCategory;
+  const kodeAdmin = findCodeSchool(req.headers.authorization);
+
+  let dataReady = [];
+  await prisma.kategori_buku_relasi
+    .findMany({
+      where: {
+        idKategoriID: idCategory,
+        kodeAdmin: kodeAdmin,
+        OR: [
+          { BukuID: { OR: [{ Judul: { contains: req.params.valueSearch } }] } },
+        ],
+      },
+    })
+    .then(async (a) => {
+      for (let i = 0; i < a.length; i++) {
+        let dataBook = await prisma.buku.findFirst({
+          select: { Gambar: true, Judul: true, BukuID: true },
+          where: { BukuID: a[i].idBuku, kode_admin: kodeAdmin },
+        });
+        let data = {
+          dataKategori: a[i],
+          dataBuku: dataBook,
+        };
+        dataReady.push(data);
+      }
+
+      response(200, dataReady, res, "Berhasil Mendapat Data");
+    });
+});
+
 router.get("/list-book-not-in-category/:idCategory", async (req, res) => {
   const idCategory = req.params.idCategory;
   const kodeAdmin = findCodeSchool(req.headers.authorization);

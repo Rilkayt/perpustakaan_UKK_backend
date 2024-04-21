@@ -278,27 +278,52 @@ router.get("/dashboard", async (req, res) => {
           kodeAdmin: dataUser.kodeSekolah,
           status: 2,
         },
+        orderBy: { tanggalPengembalian: "asc" },
       })
       .then(async (a) => {
         if (a.length > 0) {
-          for (let i = 0; i < a.length; i++) {
+          if (a.length === 1) {
             let data = {
-              idPeminjaman: a[i].idPeminjaman,
-              tanggalPeminjaman: a[i].tanggalPeminjaman,
-              tanggalPengembalian: a[i].tanggalPengembalian,
+              idPeminjaman: a[0].idPeminjaman,
+              tanggalPeminjaman: String(a[0].tanggalPeminjaman),
+              tanggalPengembalian: String(a[0].tanggalPengembalian),
               status: await prisma.status_peminjaman.findMany({
                 select: { status: true },
-                where: { id: a[i].status },
+                where: { id: a[0].status },
               }),
-              jumlah: a[i].jumlah,
+              jumlah: a[0].jumlah,
               buku: await prisma.buku.findMany({
                 where: {
-                  BukuID: a[i].idBuku,
+                  BukuID: a[0].idBuku,
                   kode_admin: dataUser.kodeSekolah,
                 },
               }),
             };
             pjmBook = pjmBook.concat(data);
+          } else {
+            for (let i = 0; i < a.length; i++) {
+              if (a[i].tanggalPengembalian == a[0].tanggalPengembalian) {
+                let data = {
+                  idPeminjaman: a[i].idPeminjaman,
+                  tanggalPeminjaman: String(a[i].tanggalPeminjaman),
+                  tanggalPengembalian: String(a[i].tanggalPengembalian),
+                  status: await prisma.status_peminjaman.findMany({
+                    select: { status: true },
+                    where: { id: a[i].status },
+                  }),
+                  jumlah: a[i].jumlah,
+                  buku: await prisma.buku.findMany({
+                    where: {
+                      BukuID: a[i].idBuku,
+                      kode_admin: dataUser.kodeSekolah,
+                    },
+                  }),
+                };
+                pjmBook = pjmBook.concat(data);
+              } else {
+                break;
+              }
+            }
           }
         } else {
           pjmBook = [];
