@@ -20,7 +20,7 @@
       const fileEdit = this.$refs.file;
 
       function sendFile() {
-        console.log(this.fileEdit);
+        // console.log(this.fileEdit);
         const formData = new FormData();
         fetch("localhost:3000/books/add-book", { file: this.fileEdit });
       }

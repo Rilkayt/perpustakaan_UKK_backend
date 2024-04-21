@@ -43,8 +43,8 @@ router.post("/:idBook", async (req, res) => {
       tanggal_pengembalian
     );
 
-    const tglPinjam = new Date(tanggal_peminjaman);
-    const tglKembali = new Date(tanggal_pengembalian);
+    const tglPinjam = new Date(tanggal_peminjaman).getTime();
+    const tglKembali = new Date(tanggal_pengembalian).getTime();
     // console.log({ tglPinjam });
 
     //   console.log(dataUser);
@@ -60,13 +60,27 @@ router.post("/:idBook", async (req, res) => {
             status: 1,
             jumlah: jumlah,
             kodeAdmin: dataUser.kodeSekolah,
-            dibuatPada: new Date(moment(new Date()).tz("Asia/Jakarta")),
-            telahKembali: "",
+            dibuatPada: new Date().getTime(),
+            telahKembali: 0,
             terlambat: 0,
           },
         })
         .then((a) => {
-          response(200, a, res, "berhasil melakukan peminjaman");
+          console.log(a);
+          let data = {
+            idPeminjaman: a.idPeminjaman,
+            tanggalPeminjaman: String(a.tanggalPeminjaman),
+            tanggalPengembalian: String(a.tanggalPengembalian),
+            jumlah: a.jumlah,
+            dibuatPada: String(a.dibuatPada),
+            idUser: a.idUser,
+            idBuku: a.idBuku,
+            kodeAdmin: a.kodeAdmin,
+            status: a.status,
+            telahKembali: String(a.telahKembali),
+            terlambat: a.terlambat,
+          };
+          response(200, data, res, "berhasil melakukan peminjaman");
         });
     } catch (error) {
       console.log(error);
@@ -115,29 +129,65 @@ router.put("/change-status/:idPeminjaman/:kodeStatus", async (req, res) => {
             .update({
               where: { idPeminjaman: idPinjam },
               data: {
-                telahKembali: moment(new Date())
-                  .tz("Asia/Jakarta")
-                  .format("YYYY-MM-DD"),
+                telahKembali: Date.now(),
               },
             })
             .then(async (a) => {
+              console.log(a);
+              console.log(new Date(parseInt(a.telahKembali)).getTime());
+              console.log(new Date(parseInt(a.tanggalPengembalian)).getTime());
               let dateRange =
-                new Date(a.telahKembali).getDay() -
-                new Date(a.tanggalPengembalian).getDay();
+                new Date(parseInt(a.telahKembali)).getTime() -
+                new Date(parseInt(a.tanggalPengembalian)).getTime();
               console.log(
                 "🚀 ~ awaitprisma.peminjaman.update ~ dateRange:",
-                dateRange
+                new Date(dateRange).getDate()
               );
-              if (dateRange >= 1) {
+              dateRange = Math.floor(dateRange / (1000 * 60 * 60 * 24));
+              if (dateRange > 0) {
                 await prisma.peminjaman.update({
                   where: { idPeminjaman: idPinjam },
-                  data: { terlambat: dateRange },
+                  data: { terlambat: new Date(dateRange).getDate() },
+                });
+              } else {
+                await prisma.peminjaman.update({
+                  where: { idPeminjaman: idPinjam },
+                  data: { terlambat: 0 },
                 });
               }
             });
+          console.log(
+            "🚀 ~ .then ~ new Date(parseInt(a.telahKembali)).getDay():",
+            new Date(parseInt(a.telahKembali)).getDay()
+          );
+          console.log(
+            "🚀 ~ .then ~ new Date(parseInt(a.telahKembali)).getDay():",
+            new Date(parseInt(a.telahKembali)).getDay()
+          );
+          console.log(
+            "🚀 ~ .then ~ new Date(parseInt(a.telahKembali)).getDay():",
+            new Date(parseInt(a.telahKembali)).getDay()
+          );
+          console.log(
+            "🚀 ~ .then ~ new Date(parseInt(a.telahKembali)).getDay():",
+            new Date(parseInt(a.telahKembali)).getDay()
+          );
         }
         console.log(dataPinjamBuku);
-        response(200, a, res, "berhasil mengubah status");
+        let data = {
+          idPeminjaman: a.idPeminjaman,
+          tanggalPeminjaman: String(a.tanggalPeminjaman),
+          tanggalPengembalian: String(a.tanggalPengembalian),
+          jumlah: a.jumlah,
+          dibuatPada: String(a.dibuatPada),
+          idUser: a.idUser,
+          idBuku: a.idBuku,
+          kodeAdmin: a.kodeAdmin,
+          status: a.status,
+          telahKembali: String(a.telahKembali),
+          terlambat: a.terlambat,
+        };
+        response(200, data, res, "berhasil mengubah status");
       });
   }
 });
@@ -164,7 +214,19 @@ router.get("/user-list", async (req, res) => {
           where: { BukuID: a[i].idBuku },
         });
         let dataReady = {
-          dataPinjam: a[i],
+          dataPinjam: {
+            idPeminjaman: a[i].idPeminjaman,
+            tanggalPeminjaman: String(a[i].tanggalPeminjaman),
+            tanggalPengembalian: String(a[i].tanggalPengembalian),
+            jumlah: a[i].jumlah,
+            dibuatPada: String(a[i].dibuatPada),
+            idUser: a[i].idUser,
+            idBuku: a[i].idBuku,
+            kodeAdmin: a[i].kodeAdmin,
+            status: a[i].status,
+            telahKembali: String(a[i].telahKembali),
+            terlambat: a[i].terlambat,
+          },
           dataBook: data,
         };
         getData.push(dataReady);

@@ -13,12 +13,12 @@ let otpData = { otp: "", exp: null };
 if (otpData.otp != "") {
   let nowTime = new Date().getTime();
 
-  console.log("waktu sekarang: ", nowTime);
-  console.log("waktu berakhir: ", endTime);
+  // console.log("waktu sekarang: ", nowTime);
+  // console.log("waktu berakhir: ", endTime);
   if (nowTime > otpData.exp) {
     otp = "";
-    console.log("waktu sekarang: ", nowTime);
-    console.log("waktu berakhir: ", endTime);
+    // console.log("waktu sekarang: ", nowTime);
+    // console.log("waktu berakhir: ", endTime);
     return "otp sudah tidak berlaku";
   }
 }
@@ -67,7 +67,7 @@ router.put("/update-image", upload.single("file"), async (req, res) => {
   if (!errorImage) {
     const dataUser = findDataUser(req.headers.authorization);
 
-    console.log(req.file);
+    // console.log(req.file);
     if (req.file == undefined)
       return response(400, {}, res, "wajib mengunggah gambar");
 
@@ -198,8 +198,8 @@ router.put("/update-email/:email/:otp", async (req, res) => {
   const dataUser = findDataUser(req.headers.authorization);
   const newEmail = req.params.email;
   const otpUser = req.params.otp;
-  console.log("🚀 ~ router.put ~ otpUser:", otpUser);
-  console.log("🚀 ~ router.put ~ otpData.otp:", otpData.otp);
+  // console.log("🚀 ~ router.put ~ otpUser:", otpUser);
+  // console.log("🚀 ~ router.put ~ otpData.otp:", otpData.otp);
 
   if (parseInt(otpUser) === otpData.otp) {
     await prisma.user
@@ -211,7 +211,7 @@ router.put("/update-email/:email/:otp", async (req, res) => {
         return response(200, {}, res, "Berhasil Mengubah Kata Sandi");
       })
       .catch((err) => {
-        console.log("🚀 ~ .then ~ err:", err);
+        // console.log("🚀 ~ .then ~ err:", err);
         return response(400, err, res, "Terjadi Kesalahan");
       });
   } else {
@@ -222,7 +222,7 @@ router.put("/update-email/:email/:otp", async (req, res) => {
 router.get("/check-otp-password/:otp", async (req, res) => {
   const otpUser = req.params.otp;
 
-  console.log("🚀 ~ router.get ~ otpData.otp:", otpData.otp);
+  // console.log("🚀 ~ router.get ~ otpData.otp:", otpData.otp);
   if (parseInt(otpUser) == otpData.otp) {
     return response(200, {}, res, "otp benar");
   } else {
@@ -243,7 +243,7 @@ router.put("/update-telp/:telp", async (req, res) => {
       return response(200, {}, res, "Berhasil Mengubah Nomor Telepon");
     })
     .catch((err) => {
-      console.log("🚀 ~ .then ~ err:", err);
+      // console.log("🚀 ~ .then ~ err:", err);
       return response(400, err, res, "Terjadi Kesalahan");
     });
 });
@@ -261,7 +261,7 @@ router.put("/update-password/:pass", async (req, res) => {
       return response(200, {}, res, "Berhasil Mengubah Password");
     })
     .catch((err) => {
-      console.log("🚀 ~ .then ~ err:", err);
+      // console.log("🚀 ~ .then ~ err:", err);
       return response(400, err, res, "Terjadi Kesalahan");
     });
 });

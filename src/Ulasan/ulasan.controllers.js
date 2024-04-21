@@ -47,9 +47,10 @@ router.post("/add-ulasan/:idBook/:statusCodeBorrow", async (req, res) => {
                 kodeAdmin: dataUser.kodeSekolah,
                 pesan: pesan,
                 rating: rating,
-                dibuatPada: new Date(),
+                dibuatPada: new Date().getTime(),
               };
               prisma.ulasan_buku.create({ data: data }).then((a) => {
+                console.log(a);
                 response(200, a, res, "ulasan berhasil ditambahkan");
               });
             } else {

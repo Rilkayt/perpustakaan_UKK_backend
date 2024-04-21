@@ -198,4 +198,38 @@ router.get("/list-book-not-in-category/:idCategory", async (req, res) => {
   return response(200, listBookReady, res, "berhasil Mendapat List Buku");
 });
 
+router.get(
+  "/search/list-book-not-in-category/:idCategory/:valueSearch",
+  async (req, res) => {
+    const idCategory = req.params.idCategory;
+    const valueSearch = req.params.valueSearch;
+    const kodeAdmin = findCodeSchool(req.headers.authorization);
+
+    let listBookReady = [];
+    await prisma.buku
+      .findMany({
+        where: {
+          kode_admin: kodeAdmin,
+          OR: [{ Judul: { contains: valueSearch } }],
+        },
+      })
+      .then(async (a) => {
+        console.log("🚀 ~ .then ~ a:", a);
+
+        for (let i = 0; i < a.length; i++) {
+          let checkCategory = await prisma.kategori_buku_relasi.count({
+            where: { idBuku: a[i].BukuID, idKategoriID: idCategory },
+          });
+          console.log("🚀 ~ .then ~ checkCategory:", checkCategory);
+
+          if (checkCategory < 1) {
+            listBookReady.push(a[i]);
+          }
+        }
+
+        return response(200, listBookReady, res, "Berhasil Mendapatkan Data");
+      });
+  }
+);
+
 module.exports = router;

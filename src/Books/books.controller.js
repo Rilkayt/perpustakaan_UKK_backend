@@ -150,17 +150,17 @@ router.post("/add-book-data/csv", uploadCSV.single("file"), (req, res) => {
   // filename: 'data.csv',
   // path: 'fileCSVImport\\data.csv',
   // size: 87
-  console.log("🚀 ~ req:", req.file);
+  // console.log("🚀 ~ req:", req.file);
   const kodeSekolah = findCodeSchool(req.headers.authorization);
 
   fs.createReadStream(`${req.file.destination}/${req.file.filename}`)
     .pipe(csv())
     .on("data", (data) => {
-      console.log("🚀 ~ .on ~ data:", data);
+      // console.log("🚀 ~ .on ~ data:", data);
       let dataSplit =
         data["Judul;Jumlah;Penulis;Penerbit;Tahun Terbit"].split(";");
-      console.log(parseInt(dataSplit[4]));
-      console.log(parseInt(dataSplit[1]));
+      // console.log(parseInt(dataSplit[4]));
+      // console.log(parseInt(dataSplit[1]));
       let readyData = {
         Gambar: "/imageFile/booksCover/default-cover.jpeg",
         Judul: dataSplit[0],
@@ -171,7 +171,7 @@ router.post("/add-book-data/csv", uploadCSV.single("file"), (req, res) => {
         Jumlah: parseInt(dataSplit[1]),
         kode_admin: kodeSekolah,
       };
-      console.log("🚀 ~ .on ~ readyData:", readyData);
+      // console.log("🚀 ~ .on ~ readyData:", readyData);
       results.push(readyData);
     })
     .on("end", async () => {
@@ -189,7 +189,7 @@ router.post("/add-book-data/csv", uploadCSV.single("file"), (req, res) => {
           .then(async (a) => {
             if (a < 1) {
               await prisma.buku.create({ data: results[i] }).then((a) => {
-                console.log("🚀 ~ awaitprisma.buku.createMany ~ a:", a);
+                // console.log("🚀 ~ awaitprisma.buku.createMany ~ a:", a);
               });
             }
           });
@@ -208,7 +208,7 @@ router.put(
     if (!errorImage) {
       const idBook = req.params.idBook;
 
-      console.log(req.file);
+      // console.log(req.file);
       await fs.rename(
         req.file.path,
         `../perpustakaan_UKK_frontend/imageFile/booksCover/${idBook}.jpeg`,
@@ -338,7 +338,16 @@ router.get("/:idBook", async (req, res) => {
           select: { ProfilAkun: true, Username: true },
           where: { UserID: a[i].idUser },
         });
-        let data = [{ ulasan: a[i], userUlasan: user }];
+        let ulasan = {
+          ulasanID: a[i].ulasanID,
+          idUser: a[i].idUser,
+          idBuku: a[i].idBuku,
+          kodeAdmin: a[i].kodeAdmin,
+          pesan: a[i].pesan,
+          rating: a[i].rating,
+          dibuatPada: String(a[i].dibuatPada),
+        };
+        let data = [{ ulasan: ulasan, userUlasan: user }];
         dataUserUlasan = dataUserUlasan.concat(data);
       }
     });
@@ -355,6 +364,8 @@ router.get("/:idBook", async (req, res) => {
     where: { idBuku: idBook, status: 3, kodeAdmin: kode_admin },
   });
 
+  console.log(borrowIsBook);
+  console.log(findUlasanUserWithTheBook);
   await prisma.buku.findMany({ where: { BukuID: idBook } }).then((a) => {
     return response(
       a.length < 1 ? 422 : 200,
@@ -363,7 +374,15 @@ router.get("/:idBook", async (req, res) => {
         sedangDipinjam: borrowIsBook,
         rating: ratingBook._avg.rating,
         ulasan: dataUserUlasan,
-        ulasanUser: findUlasanUserWithTheBook,
+        ulasanUser: {
+          ulasanID: findUlasanUserWithTheBook.ulasanID,
+          idUser: findUlasanUserWithTheBook.idUser,
+          idBuku: findUlasanUserWithTheBook.idBuku,
+          kodeAdmin: findUlasanUserWithTheBook.kodeAdmin,
+          pesan: findUlasanUserWithTheBook.pesan,
+          rating: findUlasanUserWithTheBook.rating,
+          dibuatPada: String(findUlasanUserWithTheBook.dibuatPada),
+        },
         koleksiUser: findCollectionUserWithTheBook,
         telahDiPinjamUser: findCountBorrowUserWithTheBook,
       },
@@ -402,7 +421,16 @@ router.get("/:idBook/:idUser", async (req, res) => {
           select: { ProfilAkun: true, Username: true },
           where: { UserID: a[i].idUser },
         });
-        let data = [{ ulasan: a[i], userUlasan: user }];
+        let ulasan = {
+          ulasanID: a[i].ulasanID,
+          idUser: a[i].idUser,
+          idBuku: a[i].idBuku,
+          kodeAdmin: a[i].kodeAdmin,
+          pesan: a[i].pesan,
+          rating: a[i].rating,
+          dibuatPada: String(a[i].dibuatPada),
+        };
+        let data = [{ ulasan: ulasan, userUlasan: user }];
         dataUserUlasan = dataUserUlasan.concat(data);
       }
     });
@@ -424,6 +452,8 @@ router.get("/:idBook/:idUser", async (req, res) => {
     },
   });
 
+  console.log(dataUserUlasan);
+  console.log(findCountBorrowUserWithTheBook);
   await prisma.buku.findMany({ where: { BukuID: idBook } }).then((a) => {
     return response(
       a.length < 1 ? 422 : 200,
@@ -432,7 +462,15 @@ router.get("/:idBook/:idUser", async (req, res) => {
         sedangDipinjam: borrowIsBook,
         rating: ratingBook._avg.rating,
         ulasan: dataUserUlasan,
-        ulasanUser: findUlasanUserWithTheBook,
+        ulasanUser: {
+          ulasanID: findUlasanUserWithTheBook.ulasanID,
+          idUser: findUlasanUserWithTheBook.idUser,
+          idBuku: findUlasanUserWithTheBook.idBuku,
+          kodeAdmin: findUlasanUserWithTheBook.kodeAdmin,
+          pesan: findUlasanUserWithTheBook.pesan,
+          rating: findUlasanUserWithTheBook.rating,
+          dibuatPada: String(findUlasanUserWithTheBook.dibuatPada),
+        },
         koleksiUser: findCollectionUserWithTheBook,
         telahDiPinjamUser: findCountBorrowUserWithTheBook,
       },

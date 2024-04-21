@@ -170,7 +170,19 @@ router.get("/borrow/:statusCode", async (req, res) => {
             where: { UserID: a[i].idUser },
           });
           let data = {
-            dataPinjam: a[i],
+            dataPinjam: {
+              idPeminjaman: a[i].idPeminjaman,
+              tanggalPeminjaman: String(a[i].tanggalPeminjaman),
+              tanggalPengembalian: String(a[i].tanggalPengembalian),
+              jumlah: a[i].jumlah,
+              dibuatPada: String(a[i].dibuatPada),
+              idUser: a[i].idUser,
+              idBuku: a[i].idBuku,
+              kodeAdmin: a[i].kodeAdmin,
+              status: a[i].status,
+              telahKembali: String(a[i].telahKembali),
+              terlambat: a[i].terlambat,
+            },
             buku: buku,
             user: {
               Username: user.Username,
@@ -813,7 +825,19 @@ router.get("/filter/peminjaman-user/:kode", async (req, res) => {
           where: { UserID: a[i].idUser },
         });
         let data = {
-          dataPinjam: a[i],
+          dataPinjam: {
+            idPeminjaman: a[i].idPeminjaman,
+            tanggalPeminjaman: String(a[i].tanggalPeminjaman),
+            tanggalPengembalian: String(a[i].tanggalPengembalian),
+            jumlah: a[i].jumlah,
+            dibuatPada: String(a[i].dibuatPada),
+            idUser: a[i].idUser,
+            idBuku: a[i].idBuku,
+            kodeAdmin: a[i].kodeAdmin,
+            status: a[i].status,
+            telahKembali: String(a[i].telahKembali),
+            terlambat: a[i].terlambat,
+          },
           dataBook: buku,
         };
         console.log("🚀 ~ .then ~ data:", data);

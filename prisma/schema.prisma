@@ -49,7 +49,7 @@ model buku {
   Penulis              String
   Penerbit             String
   Sinopsis             String                 @db.Text()
-  TahunTerbit          Int
+  TahunTerbit          Int                    @default(0)
   Jumlah               Int                    @default(0)
   Kode                 kode_admin             @relation(fields: [kode_admin], references: [Kode])
   kode_admin           String
@@ -61,10 +61,10 @@ model buku {
 
 model peminjaman {
   idPeminjaman        String            @id @default(uuid())
-  tanggalPeminjaman   DateTime          @db.Date
-  tanggalPengembalian DateTime          @db.Date
+  tanggalPeminjaman   BigInt
+  tanggalPengembalian BigInt
   jumlah              Int
-  dibuatPada          DateTime
+  dibuatPada          BigInt
   UserID              user              @relation(fields: [idUser], references: [UserID])
   idUser              String
   BukuID              buku              @relation(fields: [idBuku], references: [BukuID])
@@ -73,7 +73,7 @@ model peminjaman {
   kodeAdmin           String
   id                  status_peminjaman @relation(fields: [status], references: [id])
   status              Int
-  telahKembali        String
+  telahKembali        BigInt
   terlambat           Int
 }
 
@@ -123,5 +123,5 @@ model ulasan_buku {
   kodeAdmin  String
   pesan      String     @db.Text
   rating     Int
-  dibuatPada DateTime   @default(dbgenerated("CONVERT_TZ(NOW(),'UTC','Asia/Jakarta')"))
+  dibuatPada BigInt
 }

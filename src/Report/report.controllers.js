@@ -31,7 +31,10 @@ router.get("/in-mounth/:dateStart/:dateEnd", async (req, res) => {
   let dateEnd = req.params.dateEnd;
   let countAllBorrowBook = await prisma.peminjaman.count({
     where: {
-      tanggalPengembalian: { gte: new Date(dateStart), lt: new Date(dateEnd) },
+      tanggalPengembalian: {
+        gte: new Date(dateStart).getTime(),
+        lt: new Date(dateEnd).getTime(),
+      },
       kodeAdmin: dataUser.kodeSekolah,
       status: { in: [2, 3] },
     },
@@ -42,8 +45,8 @@ router.get("/in-mounth/:dateStart/:dateEnd", async (req, res) => {
     .findMany({
       where: {
         tanggalPengembalian: {
-          gte: new Date(dateStart),
-          lt: new Date(dateEnd),
+          gte: new Date(dateStart).getTime(),
+          lt: new Date(dateEnd).getTime(),
         },
         kodeAdmin: dataUser.kodeSekolah,
         status: { in: [2, 3] },
@@ -59,8 +62,8 @@ router.get("/in-mounth/:dateStart/:dateEnd", async (req, res) => {
             idBuku: dataBook.BukuID,
             kodeAdmin: dataBook.kodeSekolah,
             tanggalPengembalian: {
-              gte: new Date(dateStart),
-              lt: new Date(dateEnd),
+              gte: new Date(dateStart).getTime(),
+              lt: new Date(dateEnd).getTime(),
             },
           },
         });
@@ -87,8 +90,8 @@ router.get("/in-mounth/:dateStart/:dateEnd", async (req, res) => {
     .findMany({
       where: {
         tanggalPengembalian: {
-          gte: new Date(dateStart),
-          lt: new Date(dateEnd),
+          gte: new Date(dateStart).getTime(),
+          lt: new Date(dateEnd).getTime(),
         },
         kodeAdmin: dataUser.kodeSekolah,
         terlambat: { gt: 0 },
@@ -116,15 +119,15 @@ router.get("/in-mounth/:dateStart/:dateEnd", async (req, res) => {
         };
         let dataReady = {
           idPeminjaman: a[i].idPeminjaman,
-          tanggalPeminjaman: new Date(a[i].tanggalPeminjaman),
-          tanggalPengembalian: new Date(a[i].tanggalPengembalian),
+          tanggalPeminjaman: String(a[i].tanggalPeminjaman),
+          tanggalPengembalian: String(a[i].tanggalPengembalian),
           jumlah: a[i].jumlah,
-          dibuatPada: new Date(a[i].dibuatPada),
+          dibuatPada: String(a[i].dibuatPada),
           idUser: a[i].idUser,
           idBuku: a[i].idBuku,
           kodeAdmin: a[i].kodeAdmin,
           status: a[i].status,
-          telahKembali: a[i].telahKembali,
+          telahKembali: String(a[i].telahKembali),
           terlambat: a[i].terlambat,
           denda: a[i].terlambat * 2000,
           dataUser: dataUserReady,
@@ -139,8 +142,8 @@ router.get("/in-mounth/:dateStart/:dateEnd", async (req, res) => {
     .findMany({
       where: {
         tanggalPengembalian: {
-          gte: new Date(dateStart),
-          lt: new Date(dateEnd),
+          gte: new Date(dateStart).getTime(),
+          lt: new Date(dateEnd).getTime(),
         },
         kodeAdmin: dataUser.kodeSekolah,
         status: 2,
@@ -167,15 +170,15 @@ router.get("/in-mounth/:dateStart/:dateEnd", async (req, res) => {
         };
         let dataReady = {
           idPeminjaman: a[i].idPeminjaman,
-          tanggalPeminjaman: new Date(a[i].tanggalPeminjaman),
-          tanggalPengembalian: new Date(a[i].tanggalPengembalian),
+          tanggalPeminjaman: String(a[i].tanggalPeminjaman),
+          tanggalPengembalian: String(a[i].tanggalPengembalian),
           jumlah: a[i].jumlah,
-          dibuatPada: new Date(a[i].dibuatPada),
+          dibuatPada: String(a[i].dibuatPada),
           idUser: a[i].idUser,
           idBuku: a[i].idBuku,
           kodeAdmin: a[i].kodeAdmin,
           status: a[i].status,
-          telahKembali: a[i].telahKembali,
+          telahKembali: String(a[i].telahKembali),
           terlambat: a[i].terlambat,
           buku: book,
           dataUser: dataUserReady,
